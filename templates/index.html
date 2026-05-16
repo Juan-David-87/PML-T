@@ -1,0 +1,403 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+<section class="hero-section">
+
+    <div class="container">
+
+        <div class="row align-items-center min-vh-100">
+
+            <div class="col-lg-6">
+
+                <span class="badge bg-success-subtle text-success px-3 py-2 mb-4">
+                    Active Project · Data Science
+                </span>
+
+                <h1 class="display-2 fw-bold hero-title">
+                    Classifying regions with
+                    <span class="text-success">
+                        risk of digital
+                    </span>
+                    isolation in Colombia
+                </h1>
+
+                <p class="lead text-muted mt-4">
+                    A data-driven platform focused on analyzing and classifying 
+                    regions at risk of digital isolation in Colombia using open 
+                    connectivity datasets, territorial indicators, and machine 
+                    learning methodologies.
+                </p>
+
+                <div class="d-flex gap-3 mt-5">
+
+                    <a href="/pipeline" class="btn btn-success btn-lg px-5">
+                        Explore Pipeline
+                    </a>
+
+                    <a href="/datasets" class="btn btn-outline-secondary btn-lg px-5">
+                        View Data Sources
+                    </a>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-6">
+
+                <div class="dashboard-card">
+
+                    <h5 class="dashboard-subtitle text-uppercase mb-4">
+                        Regional Coverage
+                    </h5>
+
+                    <h2 class="display-1 fw-bold">
+                        34%
+                    </h2>
+
+                    <p class="dashboard-description">
+                        municipalities without stable connectivity
+                    </p>
+
+                    <div class="mt-4">
+
+                        <div class="mb-3">
+
+                            <div class="d-flex justify-content-between">
+                                <span>Amazon Region</span>
+                                <span>78%</span>
+                            </div>
+
+                            <div class="progress">
+                                <div class="progress-bar bg-danger" style="width: 78%"></div>
+                            </div>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <div class="d-flex justify-content-between">
+                                <span>Pacific Region</span>
+                                <span>65%</span>
+                            </div>
+
+                            <div class="progress">
+                                <div class="progress-bar bg-warning" style="width: 65%"></div>
+                            </div>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <div class="d-flex justify-content-between">
+                                <span>Caribbean Region</span>
+                                <span>38%</span>
+                            </div>
+
+                            <div class="progress">
+                                <div class="progress-bar bg-success" style="width: 38%"></div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- PROBLEM STATEMENT -->
+<section class="py-5 bg-white">
+
+    <div class="container">
+
+        <div class="row align-items-center g-5">
+
+            <!-- TEXT -->
+            <div class="col-lg-6">
+
+                <span class="text-success fw-semibold">
+                    Problem Statement
+                </span>
+
+                <h2 class="display-5 fw-bold mt-3 mb-4">
+                    Understanding Digital Isolation Risk in Colombia
+                </h2>
+
+                <p class="lead text-muted">
+                    The main objective of this project is to identify 
+                    and classify municipalities or regions in Colombia 
+                    with a high probability of digital isolation in order 
+                    to support decision-making processes related to 
+                    telecommunications infrastructure investment.
+                </p>
+
+                <p class="text-muted mt-4">
+                    Despite the growth of digital technologies, many regions 
+                    still experience limited access to stable connectivity, 
+                    technological infrastructure, and digital services. 
+                    This creates territorial inequalities that directly affect 
+                    education, communication, economic opportunities, and 
+                    access to information.
+                </p>
+
+            </div>
+
+            <!-- IMAGE -->
+            <div class="col-lg-6">
+
+                <div class="problem-image-container">
+
+                    <img 
+                        src="{{ url_for('static', filename='img/colconexion.jpg') }}" 
+                        alt="Digital connectivity in Colombia"
+                        class="img-fluid rounded-4 shadow-lg problem-image"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<!-- RESEARCH QUESTIONS -->
+<section class="py-5">
+
+    <div class="container">
+
+        <div class="row mb-5">
+
+            <div class="col-lg-8">
+
+                <span class="text-success fw-semibold">
+                    Research Questions
+                </span>
+
+                <h2 class="display-6 fw-bold mt-3">
+                    Key Questions Guiding the Project
+                </h2>
+
+                <p class="text-muted mt-4">
+                    The project is structured around a set of analytical 
+                    questions designed to better understand the relationship 
+                    between connectivity conditions, territorial inequalities, 
+                    and the risk of digital isolation in Colombia.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-lg-6">
+
+                <div class="card border-0 shadow-sm h-100 p-4">
+
+
+                    <p class="text-muted mt-3">
+                        Which socioeconomic variables are most strongly 
+                        correlated with low levels of digital connectivity 
+                        across Colombian municipalities?
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-6">
+
+                <div class="card border-0 shadow-sm h-100 p-4">
+
+
+                    <p class="text-muted mt-3">
+                        Is it possible to predict the level of digital 
+                        isolation risk (High, Medium, or Low) based on 
+                        current infrastructure, territorial conditions, 
+                        and demographic indicators?
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- KEY QUESTIONS -->
+<section class="py-5">
+
+    <div class="container">
+
+        <div class="row mb-5">
+
+            <div class="col-lg-8">
+
+                <span class="text-success fw-semibold">
+                    Key Questions
+                </span>
+
+                <h2 class="display-6 fw-bold mt-3">
+                    Why Were These Questions Defined?
+                </h2>
+
+            </div>
+
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-lg-6">
+
+                <div class="card border-0 shadow-sm h-100 p-4">
+
+                    <h4 class="fw-bold">
+                        Socioeconomic Correlation
+                    </h4>
+
+                    <p class="text-muted mt-3">
+                        One of the main goals is to determine whether 
+                        socioeconomic indicators such as population density, 
+                        education levels, income conditions, or geographic 
+                        location are directly associated with low connectivity levels.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-6">
+
+                <div class="card border-0 shadow-sm h-100 p-4">
+
+                    <h4 class="fw-bold">
+                        Predictive Risk Analysis
+                    </h4>
+
+                    <p class="text-muted mt-3">
+                        Another key question is whether it is possible 
+                        to predict the level of digital isolation risk 
+                        (High, Medium, or Low) based on current connectivity 
+                        infrastructure and demographic conditions.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- MACHINE LEARNING DEFINITION -->
+<section class="py-5 bg-white">
+
+    <div class="container">
+
+        <div class="row">
+
+            <div class="col-lg-10">
+
+                <span class="text-success fw-semibold">
+                    Machine Learning Approach
+                </span>
+
+                <h2 class="display-6 fw-bold mt-3 mb-4">
+                    Supervised Classification Problem
+                </h2>
+
+                <p class="text-muted">
+                    From a machine learning perspective, the project is defined 
+                    as a supervised learning classification problem. The target 
+                    variable corresponds to the level of digital isolation risk, 
+                    categorized into High, Medium, or Low levels.
+                </p>
+
+                <p class="text-muted">
+                    The system will analyze patterns within connectivity, 
+                    infrastructure, demographic, and territorial data in order 
+                    to train models capable of classifying municipalities 
+                    according to their vulnerability level.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- FEASIBILITY ANALYSIS -->
+<section class="py-5">
+
+    <div class="container">
+
+        <div class="row align-items-center g-5">
+
+            <!-- IMAGE -->
+            <div class="col-lg-6">
+
+                <div class="feasibility-image-container">
+
+                    <img 
+                        src="{{ url_for('static', filename='img/datosabiertos.jpg') }}" 
+                        alt="Open Data Infrastructure"
+                        class="img-fluid rounded-4 shadow-lg feasibility-image"
+                    >
+
+                </div>
+
+            </div>
+
+            <!-- TEXT -->
+            <div class="col-lg-6">
+
+                <span class="text-success fw-semibold">
+                    Feasibility Analysis
+                </span>
+
+                <h2 class="display-6 fw-bold mt-3 mb-4">
+                    Availability of Open Data
+                </h2>
+
+                <p class="text-muted">
+                    Colombia provides robust open datasets through institutions 
+                    such as MinTIC and national statistical entities. These datasets 
+                    include connectivity indicators, infrastructure coverage, 
+                    population distribution, and territorial information.
+                </p>
+
+                <p class="text-muted">
+                    However, one of the main challenges of the project is integrating 
+                    heterogeneous data sources, especially when combining connectivity 
+                    indicators with geographic, demographic, and socioeconomic data 
+                    for machine learning analysis.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

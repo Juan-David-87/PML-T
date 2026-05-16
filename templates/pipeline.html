@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Pipeline{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <h1 class="display-4 fw-bold mb-4">
+        Project Pipeline
+    </h1>
+
+    <p class="lead text-muted mb-5">
+        Structured workflow designed to support the analysis, 
+        preprocessing, transformation, and classification of 
+        regions at risk of digital isolation using machine learning techniques.
+    </p>
+
+    <div class="row g-4">
+
+        <div class="col-lg-3">
+
+            <div class="card h-100 p-4 border-0 shadow-sm">
+
+                <h5>Phase 01</h5>
+
+                <h2>Data Selection</h2>
+
+                <p>
+                    Identify and evaluate open connectivity datasets 
+                    relevant to the project objectives.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3">
+
+            <div class="card h-100 p-4 border-0 shadow-sm">
+
+                <h5>Phase 02</h5>
+
+                <h2>Data Cleaning</h2>
+
+                <p>
+                    Handle missing values, duplicated records, 
+                    inconsistencies, and outliers.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3">
+
+            <div class="card h-100 p-4 border-0 shadow-sm">
+
+                <h5>Phase 03</h5>
+
+                <h2>Transformation</h2>
+
+                <p>
+                    Apply feature engineering, normalization, 
+                    and preprocessing techniques for modeling.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3">
+
+            <div class="card h-100 p-4 border-0 shadow-sm">
+
+                <h5>Phase 04</h5>
+
+                <h2>Machine Learning</h2>
+
+                <p>
+                    Train, evaluate, and compare machine learning 
+                    models for regional classification.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

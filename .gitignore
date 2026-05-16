@@ -5,9 +5,6 @@
 __pycache__/
 *.pyc
 
-# VSCode
-.vscode/
-
 # Environment variables
 .env
 

@@ -1,20 +1,328 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
-{% block title %}Data Understanding{% endblock %}
+{% block title %}
+Data Understanding - BrechaDigital CO
+{% endblock %}
 
 {% block content %}
 
-<div class="container py-5">
+<section class="py-5" style="background-color: #f5f8f6; min-height: 100vh;">
 
-    <h1 class="display-4 fw-bold">
-        Data Understanding
-    </h1>
+    <div class="container">
 
-    <p class="lead text-muted mt-4">
-        Exploration and analysis of datasets, variables,
-        and connectivity indicators.
-    </p>
+        <!-- Header -->
+        <div class="text-center mb-5">
+            <h1 class="fw-bold text-success">
+                Data Understanding
+            </h1>
 
-</div>
+            <p class="text-muted col-lg-9 mx-auto">
+                This section presents the exploratory analysis performed on the selected
+                dataset used in the BrechaDigital CO project. The purpose of this phase
+                is to understand the structure, quality, completeness, and analytical
+                potential of the information before beginning preprocessing and machine
+                learning activities. The analysis includes exploratory data analysis,
+                variable inspection, missing value evaluation, data quality assessment,
+                statistical summaries, and correlation analysis.
+            </p>
+        </div>
+
+        <!-- EDA -->
+        <div class="card border-0 shadow-sm mb-4 rounded-4">
+
+            <div class="card-header text-white py-3"
+                style="background-color: #198754;">
+                <h3 class="mb-0">
+                    Exploratory Data Analysis (EDA)
+                </h3>
+            </div>
+
+            <div class="card-body p-4">
+
+                <p>
+                    An exploratory data analysis (EDA) was conducted to understand
+                    the structure, organization, and analytical characteristics of
+                    the dataset before future preprocessing and predictive modeling
+                    stages.
+                </p>
+
+                <p>
+                    The exploratory process focused on understanding dataset dimensions,
+                    identifying variable types, examining historical observations,
+                    and evaluating territorial information associated with municipalities,
+                    departments, and institutional entities across Colombia.
+                </p>
+
+                <p>
+                    Additional inspection activities included reviewing duplicated
+                    observations, detecting possible inconsistencies, and understanding
+                    the distribution of digital government indicators across different
+                    territorial entities.
+                </p>
+
+                <p>
+                    Initial findings suggested that the dataset presents a structured
+                    tabular organization suitable for exploratory analysis and future
+                    machine learning preparation. Historical observations also support
+                    comparisons between municipalities and departments over time.
+                </p>
+
+            </div>
+        </div>
+
+        <!-- Variable Analysis -->
+        <div class="card border-0 shadow-sm mb-4 rounded-4">
+
+            <div class="card-header text-white py-3"
+                style="background-color: #198754;">
+                <h3 class="mb-0">
+                    Variable Analysis
+                </h3>
+            </div>
+
+            <div class="card-body p-4">
+
+                <p>
+                    A variable analysis was conducted to understand the meaning,
+                    interpretation, and analytical role of the features contained
+                    in the dataset. The selected information includes both numerical
+                    and categorical variables associated with territorial, historical,
+                    and institutional characteristics.
+                </p>
+
+                <p>
+                    Categorical variables provide contextual information related to
+                    municipalities, departments, entities, and administrative
+                    classifications, while numerical variables represent digital
+                    government performance indicators and historical measurements.
+                </p>
+
+                <p>
+                    Understanding the role of each variable helps support future
+                    preprocessing, feature selection, and machine learning preparation.
+                </p>
+
+                <div class="row mt-4">
+
+                    <div class="col-md-6 mb-3">
+
+                        <div class="p-4 rounded-4 border bg-light h-100">
+
+                            <h5 class="fw-bold text-success">
+                                Numerical Variables
+                            </h5>
+
+                            <p class="text-muted">
+                                Numerical variables represent scores, measurements,
+                                identifiers, and historical indicators.
+                            </p>
+
+                            <ul>
+                                <li>ENTITY_SCORE</li>
+                                <li>VALIDITY</li>
+                                <li>MUNICIPALITY_ID</li>
+                                <li>DEPARTMENT_ID</li>
+                                <li>EVEN_GROUP_AVERAGE</li>
+                                <li>EVEN_GROUP_MAXIMUM</li>
+                                <li>EVEN_GROUP_PERCENTILE</li>
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <div class="p-4 rounded-4 border bg-light h-100">
+
+                            <h5 class="fw-bold text-success">
+                                Categorical Variables
+                            </h5>
+
+                            <p class="text-muted">
+                                Categorical variables describe territorial and
+                                institutional classifications.
+                            </p>
+
+                            <ul>
+                                <li>MUNICIPALITY</li>
+                                <li>DEPARTMENT</li>
+                                <li>ENTITY</li>
+                                <li>ORDER</li>
+                                <li>INDEX</li>
+                                <li>LEGAL_NATURE</li>
+                                <li>SECTOR</li>
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Missing Values -->
+        <div class="card border-0 shadow-sm mb-4 rounded-4">
+
+            <div class="card-header text-white py-3"
+                style="background-color: #198754;">
+                <h3 class="mb-0">
+                    Missing Value Analysis
+                </h3>
+            </div>
+
+            <div class="card-body p-4">
+
+                <p>
+                    A missing value analysis was conducted to evaluate the completeness
+                    and reliability of the dataset. The inspection process aimed to
+                    identify incomplete observations and determine whether missing
+                    information could negatively affect future analytical processes.
+                </p>
+
+                <p>
+                    Some historical and institutional records contained incomplete
+                    values, especially in territorial or administrative fields.
+                    These missing observations may reflect unavailable reporting,
+                    historical inconsistencies, or data collection limitations.
+                </p>
+
+                <p>
+                    At this stage, missing values were documented and reviewed in
+                    order to preserve transparency and support future preprocessing
+                    decisions such as imputation, replacement, or removal strategies.
+                </p>
+
+                <p>
+                    Understanding missing information is important to improve data
+                    consistency and minimize reliability problems during future
+                    predictive modeling stages.
+                </p>
+
+            </div>
+        </div>
+
+        <!-- Data Quality -->
+        <div class="card border-0 shadow-sm mb-4 rounded-4">
+
+            <div class="card-header text-white py-3"
+                style="background-color: #198754;">
+                <h3 class="mb-0">
+                    Data Quality Evaluation
+                </h3>
+            </div>
+
+            <div class="card-body p-4">
+
+                <p>
+                    Data quality evaluation focused on assessing the reliability,
+                    consistency, and usability of the selected dataset.
+                </p>
+
+                <p>
+                    The evaluation process reviewed duplicated records, formatting
+                    inconsistencies, historical coherence, incomplete observations,
+                    and territorial naming conventions.
+                </p>
+
+                <p>
+                    Particular attention was given to ensuring that municipalities,
+                    departments, and institutional information remained consistent
+                    across observations in order to improve interpretability and
+                    future analytical reliability.
+                </p>
+
+                <p>
+                    Overall, the dataset presented acceptable quality standards,
+                    although minor inconsistencies were identified and documented
+                    for future preprocessing stages.
+                </p>
+
+            </div>
+        </div>
+
+        <!-- Statistical Summary -->
+        <div class="card border-0 shadow-sm mb-4 rounded-4">
+
+            <div class="card-header text-white py-3"
+                style="background-color: #198754;">
+                <h3 class="mb-0">
+                    Statistical Summary
+                </h3>
+            </div>
+
+            <div class="card-body p-4">
+
+                <p>
+                    Statistical summaries were considered to better understand the
+                    behavior of numerical variables and institutional performance
+                    indicators included in the dataset.
+                </p>
+
+                <p>
+                    Descriptive measures such as averages, minimum values, maximum
+                    values, percentile distributions, and variability were reviewed
+                    to better understand territorial digital development patterns.
+                </p>
+
+                <p>
+                    Statistical exploration helps identify performance differences
+                    between municipalities and departments and supports future
+                    preprocessing and predictive analysis.
+                </p>
+
+                <p>
+                    These summaries provide a clearer understanding of how digital
+                    government indicators behave across different territorial contexts.
+                </p>
+
+            </div>
+        </div>
+
+        <!-- Correlation -->
+        <div class="card border-0 shadow-sm rounded-4">
+
+            <div class="card-header text-white py-3"
+                style="background-color: #198754;">
+                <h3 class="mb-0">
+                    Correlation Analysis
+                </h3>
+            </div>
+
+            <div class="card-body p-4">
+
+                <p>
+                    Correlation analysis was preliminarily considered to explore
+                    possible relationships between numerical variables associated
+                    with institutional performance and digital government indicators.
+                </p>
+
+                <p>
+                    The objective of this analysis is to identify whether certain
+                    variables present similar behavioral patterns that may contribute
+                    to future predictive tasks and feature selection.
+                </p>
+
+                <p>
+                    Preliminary exploration suggests that some digital performance
+                    indicators may present related tendencies due to the measurement
+                    methodology and evaluation criteria used within the dataset.
+                </p>
+
+                <p>
+                    Correlation analysis represents an important step toward future
+                    machine learning implementation because it helps understand
+                    relationships between variables and supports better model
+                    preparation decisions.
+                </p>
+
+            </div>
+        </div>
+
+    </div>
+
+</section>
 
 {% endblock %}

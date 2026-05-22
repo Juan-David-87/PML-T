@@ -6,15 +6,502 @@
 
 <div class="container py-5">
 
-    <h1 class="display-4 fw-bold">
-        Data Engineering
-    </h1>
-
-    <p class="lead text-muted mt-4">
-        Data preprocessing, cleaning, transformation,
-        and feature engineering processes.
+    <!-- Header -->
+    <h1 class="display-4 fw-bold">Data Engineering</h1>
+    <p class="lead text-muted mt-3 mb-5">
+        Complete preprocessing pipeline for the <strong>Digital Government Index — Historical</strong> dataset.
+        Each step is documented with its objective, rationale, and applied operations.
     </p>
 
-</div>
+    <!-- Step cards -->
+    <div class="row g-4">
+
+        <!-- STEP 1 · DATA CLEANING -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span class="badge bg-success bg-opacity-10 text-success fs-6 px-3 py-2">Step 1</span>
+                        <h2 class="h4 fw-bold mb-0">Data Cleaning</h2>
+                    </div>
+
+                    <p class="text-muted mb-4">
+                        Standardise the raw dataset by fixing column names, removing duplicates, correcting data types,
+                        and enforcing domain rules so that downstream steps operate on structurally sound data.
+                    </p>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">What</p>
+                                <p class="small mb-0">Detect and correct inaccurate, inconsistent, or structurally corrupt records before any analysis.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">Why</p>
+                                <p class="small mb-0">Dirty data propagates errors throughout the pipeline. Inconsistent names and wrong types bias every metric.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">How</p>
+                                <p class="small mb-0">Rename columns to <code>snake_case</code>, drop duplicates, strip whitespace, uppercase text, coerce types, and remove out-of-range records.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>Column name standardisation</strong> — renamed all 18 columns to lowercase ASCII <code>snake_case</code>, removing Spanish accents and spaces.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>Exact duplicate removal</strong> — dropped rows where all 18 fields are identical.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>Whitespace trimming</strong> — applied <code>str.strip()</code> to all text columns.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>Text case normalisation</strong> — all categorical columns converted to uppercase.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>Data type enforcement</strong> — year/ID columns cast to <code>Int64</code>; score columns kept as <code>float64</code>.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>Domain rule validation</strong> — removed records where scores fall outside [0, 100] or quintiles outside [1, 5].
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2 · NULL HANDLING -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span class="badge bg-warning bg-opacity-10 text-warning fs-6 px-3 py-2">Step 2</span>
+                        <h2 class="h4 fw-bold mb-0">Null Value Handling</h2>
+                    </div>
+
+                    <p class="text-muted mb-4">
+                        Systematically identify and treat missing data — dropping columns with excessive absence,
+                        and imputing reasonable values based on each column's statistical distribution.
+                    </p>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">What</p>
+                                <p class="small mb-0">Systematic identification and treatment of missing data.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">Why</p>
+                                <p class="small mb-0">Most ML algorithms cannot handle <code>NaN</code> values. Missing scores may represent entities that did not participate in a given measurement cycle.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">Strategy</p>
+                                <p class="small mb-0">Numeric scores → median. Quintil → mode. Categoricals → <code>'UNKNOWN'</code>. Columns with &gt;50 % nulls are dropped.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>High-null column removal (&gt;50 %)</strong> — any column with more than half the records missing is dropped.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>Median imputation</strong> — applied to <code>puntaje_entidad</code>, <code>promedio_grupo_par</code>, <code>maximo_grupo_par</code>, <code>minimo_grupo_par</code>, <code>percentil_grupo_par</code>.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>Mode imputation</strong> — applied to <code>quintil_grupo_par</code> (ordinal integer 1–5).
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>'UNKNOWN' label</strong> — missing values in <code>orden</code>, <code>sector</code>, <code>naturaleza_juridica</code>, <code>departamento</code>, <code>municipio</code>, <code>indice</code> are filled with an explicit label to preserve missingness as a learnable signal.
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 3 · TRANSFORMATION -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span class="badge bg-primary bg-opacity-10 text-primary fs-6 px-3 py-2">Step 3</span>
+                        <h2 class="h4 fw-bold mb-0">Data Transformation</h2>
+                    </div>
+
+                    <p class="text-muted mb-4">
+                        Derive new variables that expose latent structure — such as how far an entity is from the
+                        best performer in its group, or whether it exceeds the group average.
+                    </p>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">What</p>
+                                <p class="small mb-0">Create new columns by applying mathematical or logical operations to existing ones.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">Why</p>
+                                <p class="small mb-0">Raw score columns alone cannot encode contextual relationships like gap to the best peer or relative group position.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">Result</p>
+                                <p class="small mb-0">6 new numeric features and 1 categorical tier variable added to the dataset.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong><code>gap_to_max</code></strong> = <code>maximo_grupo_par − puntaje_entidad</code> — distance from the top performer in the peer group.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong><code>gap_to_avg</code></strong> = <code>puntaje_entidad − promedio_grupo_par</code> — positive means above average, negative means below.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong><code>spread_grupo_par</code></strong> = <code>maximo − minimo</code> — how heterogeneous the peer group is.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong><code>relative_performance</code></strong> = <code>(score − min) / (max − min)</code> — normalises each entity to [0, 1] within its peer group.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong><code>performance_tier</code></strong> — discretised into four bands: HIGH (≥80), MEDIUM-HIGH (60–79), MEDIUM-LOW (40–59), LOW (&lt;40).
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong><code>year_offset</code></strong> = <code>vigencia − min(vigencia)</code> — anchors the year at zero for trend modelling.
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 4 · ENCODING -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span class="badge bg-info bg-opacity-10 text-info fs-6 px-3 py-2">Step 4</span>
+                        <h2 class="h4 fw-bold mb-0">Categorical Variable Encoding</h2>
+                    </div>
+
+                    <p class="text-muted mb-4">
+                        Convert text categories into numeric representations so that ML algorithms
+                        can process them via arithmetic or distance metrics.
+                    </p>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">What</p>
+                                <p class="small mb-0">Translation of categorical text variables into numeric form.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">Why</p>
+                                <p class="small mb-0">Most ML models require numeric inputs. Without encoding, columns like <code>sector</code> are ignored or cause errors.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">Scheme</p>
+                                <p class="small mb-0">Label Encoding for ordinal columns, One-Hot (top-N) for nominals, Frequency Encoding for high-cardinality columns.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>Label Encoding</strong> → <code>orden</code>, <code>naturaleza_juridica</code> — few distinct values, each category mapped to an integer.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>One-Hot Encoding (top 10)</strong> → <code>sector</code> — top 10 categories encoded; remaining grouped as 'OTHER' to limit dimensionality.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>Frequency Encoding</strong> → <code>indice</code>, <code>departamento</code> — high-cardinality columns replaced with their relative frequency, avoiding hundreds of new columns.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>Ordinal Encoding</strong> → <code>performance_tier</code> — LOW=0, MEDIUM-LOW=1, MEDIUM-HIGH=2, HIGH=3, preserving the inherent order.
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 5 · FEATURE SELECTION -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span class="badge bg-danger bg-opacity-10 text-danger fs-6 px-3 py-2">Step 5</span>
+                        <h2 class="h4 fw-bold mb-0">Feature Selection</h2>
+                    </div>
+
+                    <p class="text-muted mb-4">
+                        Retain only the most informative features from the full candidate pool to reduce dimensionality,
+                        mitigate overfitting, and improve model interpretability.
+                    </p>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">What</p>
+                                <p class="small mb-0">Select a subset of features from the full pool to reduce dimensionality and noise.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">Why</p>
+                                <p class="small mb-0">After encoding and transformation the dataset has 30+ columns. Irrelevant or redundant features increase training time and can hurt generalisation.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">Methods</p>
+                                <p class="small mb-0">Variance Threshold → Correlation Filter → SelectKBest / F-regression, applied in sequence.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>Variance Threshold (0.01)</strong> — features whose variance is below 0.01 are nearly constant and carry no information; dropped automatically.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>Correlation Filter (|r| &gt; 0.95)</strong> — for each highly correlated pair, the second column is dropped to remove multicollinearity.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>SelectKBest · F-regression (k = 10)</strong> — ranks remaining features by their univariate F-statistic against <code>percentil_grupo_par</code>; the top 10 are retained.
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 6 · FEATURE ENGINEERING -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary fs-6 px-3 py-2">Step 6</span>
+                        <h2 class="h4 fw-bold mb-0">Feature Engineering</h2>
+                    </div>
+
+                    <p class="text-muted mb-4">
+                        Build domain-informed temporal features that capture performance trajectories —
+                        information invisible in any single year's snapshot.
+                    </p>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">What</p>
+                                <p class="small mb-0">Construct new features using domain knowledge to leverage the multi-year structure of the dataset.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">Why</p>
+                                <p class="small mb-0">A single year's score cannot show whether an entity is improving, stagnating, or declining. Temporal features expose these trends.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">Result</p>
+                                <p class="small mb-0">6 new temporal and contextual features computed via <code>groupby</code>, <code>diff</code>, and <code>rolling</code> operations.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong><code>yoy_change</code></strong> — year-over-year score delta per entity-index pair; positive = improvement, negative = regression.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong><code>rolling_2y_avg</code></strong> — 2-year rolling mean that smooths short-term volatility and reflects a stable performance baseline.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong><code>improving</code></strong> — binary flag (1 = score increased vs prior year); simplifies the trend signal for classification tasks.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong><code>entity_historical_avg</code></strong> — entity-level average across all years; provides a baseline independent of year or index.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong><code>deviation_from_entity_avg</code></strong> — current score minus entity's own historical average; identifies exceptionally good or poor years.
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong><code>urgency_index</code></strong> = <code>gap_to_max × year_offset</code> — amplifies urgency for entities that have been far from the group maximum for many years.
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 7 · NORMALISATION -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <span class="badge bg-dark bg-opacity-10 text-dark fs-6 px-3 py-2">Step 7</span>
+                        <h2 class="h4 fw-bold mb-0">Normalisation &amp; Scaling</h2>
+                    </div>
+
+                    <p class="text-muted mb-4">
+                        Bring all numeric features to comparable scales so that no single column dominates
+                        distance-based or gradient-based algorithms due to its absolute magnitude.
+                    </p>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">What</p>
+                                <p class="small mb-0">Transform numeric features so they occupy a common range or distribution.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">Why</p>
+                                <p class="small mb-0">Without scaling, a feature ranging 0–100 and one ranging 0–1 are treated very differently by algorithms like SVM or KNN, even if equally important.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light rounded-3 p-3 h-100">
+                                <p class="small fw-semibold text-uppercase text-muted mb-1">Three scalers</p>
+                                <p class="small mb-0">MinMaxScaler for bounded scores, StandardScaler for deltas, RobustScaler for ordinal variables prone to outliers.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>MinMaxScaler → suffix <code>_minmax</code></strong> — applied to score and group-benchmark columns
+                            (<code>puntaje_entidad</code>, <code>gap_to_max</code>, <code>gap_to_avg</code>, <code>spread_grupo_par</code>, <code>relative_performance</code>, etc.).
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>StandardScaler (Z-score) → suffix <code>_zscore</code></strong> — applied to temporal and deviation columns
+                            (<code>percentil_grupo_par</code>, <code>yoy_change</code>, <code>rolling_2y_avg</code>, <code>deviation_from_entity_avg</code>, <code>urgency_index</code>).
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="badge bg-success me-2">✓</span>
+                            <strong>RobustScaler → suffix <code>_robust</code></strong> — applied to <code>year_offset</code> and <code>quintil_grupo_par</code>;
+                            uses IQR instead of mean/std, making it resilient to outliers in ordinal distributions.
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- OUTPUT SUMMARY -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm bg-success bg-opacity-10">
+                <div class="card-body p-4">
+
+                    <h2 class="h4 fw-bold mb-3">Pipeline Output</h2>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-6 col-md-3">
+                            <div class="text-center">
+                                <p class="display-6 fw-bold text-success mb-0">18</p>
+                                <p class="small text-muted mb-0">Source columns</p>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-center">
+                                <p class="display-6 fw-bold text-success mb-0">7</p>
+                                <p class="small text-muted mb-0">Pipeline steps</p>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-center">
+                                <p class="display-6 fw-bold text-success mb-0">6</p>
+                                <p class="small text-muted mb-0">Engineered features</p>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-center">
+                                <p class="display-6 fw-bold text-success mb-0">3</p>
+                                <p class="small text-muted mb-0">Scaling methods</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="mb-2">
+                        <strong>Output file:</strong> <code>indice_gobierno_digital_processed.csv</code> —
+                        contains all original columns plus all derived, encoded, and scaled features, saved as UTF-8 CSV.
+                    </p>
+                    <p class="mb-2">
+                        <strong>Target variable:</strong> <code>percentil_grupo_par</code> (continuous 0–100) for regression tasks.
+                        Use <code>performance_tier_encoded</code> (ordinal 0–3) for classification.
+                    </p>
+                    <p class="mb-0">
+                        <strong>Recommended next steps:</strong>
+                        Exploratory Data Analysis → Baseline model (Random Forest / XGBoost) →
+                        Hyperparameter tuning → Cross-validation with temporal split by <code>vigencia</code>.
+                    </p>
+
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /row -->
+
+</div><!-- /container -->
 
 {% endblock %}

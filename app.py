@@ -3,24 +3,29 @@ from flask import Flask, render_template
 app = Flask(__name__)
 
 @app.route("/")
-def index():
+def home():
     return render_template("index.html")
 
-@app.route("/pipeline")
-def pipeline():
-    return render_template("pipeline.html")
 
-@app.route("/datasets")
-def datasets():
-    return render_template("datasets.html")
+@app.route("/crispml")
+def crispml():
+    return render_template("crispml.html")
 
-@app.route("/resultados")
-def resultados():
-    return render_template("resultados.html")
 
-@app.route("/about")
-def about():
-    return render_template("about.html")
+@app.route("/business-understanding")
+def business_understanding():
+    return render_template("business_understanding.html")
+
+
+@app.route("/data-understanding")
+def data_understanding():
+    return render_template("data_understanding.html")
+
+
+@app.route("/data-engineering")
+def data_engineering():
+    return render_template("data_engineering.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True)

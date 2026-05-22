@@ -87,3 +87,7 @@ body{
 .feasibility-image:hover{
     transform: scale(1.02);
 }
+
+.hero-row{
+    min-height: 75vh;
+}

@@ -1,312 +1,451 @@
 """
-K-Means Clustering Pipeline
-Dataset: Índice de Gobierno Digital - Histórico
-Target: Group municipalities/departments by digital governance risk level
-Output: kmeans_results.json  (consumed by the Flask HTML template)
+kmeans_model.py
+───────────────
+K-Means clustering model for classifying Colombian public entities
+by their Digital Government Index (Índice de Gobierno Digital).
+
+Dataset : indice_gobierno_digital.csv  (77 163 rows, 18 columns)
+Features: 7 sub-index scores per entity (I18, I20, I21, I82, I83, I85, POL06)
+Output  : 4 clusters ranked by overall digital maturity
 """
 
-import json
-import warnings
-import numpy as np
 import pandas as pd
+import numpy as np
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import os
+import warnings
+warnings.filterwarnings("ignore")
+
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from sklearn.metrics import (
-    silhouette_score, davies_bouldin_score, calinski_harabasz_score
-)
-from sklearn.model_selection import train_test_split
+from sklearn.metrics import silhouette_score, davies_bouldin_score
 
-warnings.filterwarnings("ignore")
+# ─── Configuration ────────────────────────────────────────────────────────────────
+DATA_PATH   = "indice_gobierno_digital.csv"
+OUT_DIR     = "static/img/kmeans"
+FEATURES    = ["I18", "I20", "I21", "I82", "I83", "I85", "POL06"]
+K_FINAL     = 4
+RANDOM_STATE = 42
+PALETTE     = ["#22c55e", "#38bdf8", "#f59e0b", "#f43f5e"]
 
-# ─── 0. LOAD & BASIC CLEANING ────────────────────────────────────────────────
-df = pd.read_csv("indice_gobierno_digital.csv")
-print(f"Columnas originales detectadas: {df.columns.tolist()}")
-
-# Convertir todo a MAYÚSCULAS y cambiar espacios por guiones bajos primero
-df.columns = df.columns.str.strip().str.upper().str.replace(" ", "_")
-
-# Remover todas las tildes de los nombres de las columnas
-df.columns = (
-    df.columns.str.replace("Á", "A")
-              .str.replace("É", "E")
-              .str.replace("Í", "I")
-              .str.replace("Ó", "O")
-              .str.replace("Ú", "U")
-              .str.replace("Ñ", "N")
-)
-
-# Mapear con precisión quirúrgica
-RENAME = {
-    "CODIGO_SIGEP":       "codigo_sigep",
-    "ENTIDAD":            "entidad",
-    "ORDEN":              "orden",
-    "SECTOR":             "sector",
-    "NATURALEZA_JURIDICA":"naturaleza_juridica",
-    "ID_DEPARTAMENTO":    "id_departamento",
-    "DEPARTAMENTO":       "departamento",
-    "ID_MUNICIPIO":       "id_municipio",
-    "MUNICIPIO":          "municipio",
-    "VIGENCIA":           "vigencia",
-    "ID_INDICE":          "id_indice",
-    "INDICE":             "indice",
-    "PUNTAJE_ENTIDAD":    "puntaje_entidad",
-    "PROMEDIO_GRUPO_PAR": "promedio_grupo_par",
-    "MAXIMO_GRUPO_PAR":   "maximo_grupo_par",
-    "MINIMO_GRUPO_PAR":   "minimo_grupo_par",
-    "QUINTIL_GRUPO_PAR":  "quintil_grupo_par",
-    "PERCENTIL_GRUPO_PAR":"percentil_grupo_par",
+CLUSTER_LABELS = {
+    0: "Medium-High Digital",
+    1: "High Digital",
+    2: "Low Digital",
+    3: "Medium Digital",
 }
-df.rename(columns=RENAME, inplace=True)
 
-# ─── 1. DATASET SPLIT ────────────────────────────────────────────────────────
-# Filtrar por el año más reciente con datos completos (2021)
-df21 = df[df["vigencia"] == 2021].copy()
+os.makedirs(OUT_DIR, exist_ok=True)
 
-# SOLUCIÓN: Convertir 'puntaje_entidad' y 'percentil' de texto a número (comas a puntos)
-for col in ["puntaje_entidad", "percentil_grupo_par"]:
-    if col in df21.columns:
-        if df21[col].dtype == object:
-            df21[col] = df21[col].astype(str).str.replace(',', '.')
-        df21[col] = pd.to_numeric(df21[col], errors='coerce')
 
-# Verificar si la columna del percentil existe para resguardarla
-has_percentil = "percentil_grupo_par" in df21.columns
+# ═══════════════════════════════════════════════════════════════════════════════
+# 1 ▸ DATA LOADING & PREPROCESSING
+# ═══════════════════════════════════════════════════════════════════════════════
 
-# Pivotar: Agrupa por municipio y departamento, indexando cada sub-índice en columnas
-pivot = (
-    df21.pivot_table(
-        index=["municipio", "departamento"],
-        columns="indice",
-        values="puntaje_entidad",
-        aggfunc="mean"
+def load_and_prepare(path: str):
+    """Load CSV, fix decimal separators, pivot to one entity per row."""
+    df = pd.read_csv(path)
+
+    def to_float(s):
+        try:
+            return float(str(s).replace(",", "."))
+        except Exception:
+            return np.nan
+
+    for col in ["PUNTAJE ENTIDAD", "PROMEDIO GRUPO PAR",
+                "MÁXIMO GRUPO PAR", "MÍNIMO GRUPO PAR"]:
+        df[col + "_f"] = df[col].apply(to_float)
+
+    pivot = df.pivot_table(
+        index=["CÓDIGO_SIGEP", "ENTIDAD", "ORDEN", "DEPARTAMENTO", "MUNICIPIO"],
+        columns="ID_ÍNDICE",
+        values="PUNTAJE ENTIDAD_f",
+        aggfunc="mean",
+    ).reset_index()
+
+    return pivot
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 2 ▸ DATASET SPLIT (train / validation)
+#     K-Means is unsupervised; we simulate a hold-out split by fitting on 80 %
+#     of the data and predicting on the remaining 20 % to validate label
+#     consistency via Silhouette on the unseen subset.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def split_data(X_scaled: np.ndarray):
+    n = len(X_scaled)
+    rng = np.random.default_rng(RANDOM_STATE)
+    idx = rng.permutation(n)
+    split = int(0.8 * n)
+    train_idx = idx[:split]
+    val_idx   = idx[split:]
+    return train_idx, val_idx
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 3 ▸ HYPERPARAMETER SELECTION — Elbow + Silhouette
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def hyperparameter_search(X_scaled: np.ndarray, k_range=range(2, 11)):
+    inertias, silhouettes = [], []
+    for k in k_range:
+        km = KMeans(n_clusters=k, random_state=RANDOM_STATE, n_init=10)
+        lbls = km.fit_predict(X_scaled)
+        inertias.append(km.inertia_)
+        silhouettes.append(silhouette_score(X_scaled, lbls))
+
+    # ── Plot ──────────────────────────────────────────────────────────────────
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    fig.patch.set_facecolor("#0f172a")
+    for ax in axes:
+        ax.set_facecolor("#1e293b")
+        ax.tick_params(colors="#94a3b8")
+        for sp in ax.spines.values():
+            sp.set_edgecolor("#334155")
+
+    axes[0].plot(list(k_range), inertias, "o-", color="#22c55e", lw=2.5, ms=8)
+    axes[0].axvline(K_FINAL, color="#f59e0b", ls="--", lw=1.5, label=f"K={K_FINAL}")
+    axes[0].set_title("Elbow Method — WCSS vs K", color="white", fontsize=13, pad=12)
+    axes[0].set_xlabel("K", color="#94a3b8")
+    axes[0].set_ylabel("Inertia (WCSS)", color="#94a3b8")
+    axes[0].legend(facecolor="#1e293b", labelcolor="white")
+    axes[0].grid(True, color="#334155", alpha=0.5)
+
+    axes[1].plot(list(k_range), silhouettes, "s-", color="#38bdf8", lw=2.5, ms=8)
+    axes[1].axvline(K_FINAL, color="#f59e0b", ls="--", lw=1.5, label=f"K={K_FINAL}")
+    axes[1].set_title("Silhouette Score vs K", color="white", fontsize=13, pad=12)
+    axes[1].set_xlabel("K", color="#94a3b8")
+    axes[1].set_ylabel("Silhouette Score", color="#94a3b8")
+    axes[1].legend(facecolor="#1e293b", labelcolor="white")
+    axes[1].grid(True, color="#334155", alpha=0.5)
+
+    plt.tight_layout(pad=2)
+    plt.savefig(f"{OUT_DIR}/elbow_silhouette.png", dpi=130,
+                bbox_inches="tight", facecolor="#0f172a")
+    plt.close()
+
+    best_sil_k = list(k_range)[int(np.argmax(silhouettes))]
+    return inertias, silhouettes, best_sil_k
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 4 ▸ TRAINING
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def train_kmeans(X_train: np.ndarray):
+    km = KMeans(
+        n_clusters=K_FINAL,
+        init="k-means++",
+        n_init=20,
+        max_iter=300,
+        random_state=RANDOM_STATE,
     )
-    .reset_index()
-)
+    km.fit(X_train)
 
-# Mantener solo los sub-índices con presencia en al menos el 50% de los registros
-threshold = 0.50 * len(pivot)
-valid_cols = [
-    c for c in pivot.columns
-    if c not in ("municipio", "departamento")
-    and pivot[c].notna().sum() >= threshold
-]
+    # ── Convergence plot ──────────────────────────────────────────────────────
+    iters_inertia = []
+    for max_it in range(1, 31):
+        km_it = KMeans(n_clusters=K_FINAL, random_state=RANDOM_STATE,
+                       n_init=1, max_iter=max_it)
+        km_it.fit(X_train)
+        iters_inertia.append(km_it.inertia_)
 
-pivot_clean = pivot[["municipio", "departamento"] + valid_cols].dropna()
+    fig, ax = plt.subplots(figsize=(10, 5))
+    fig.patch.set_facecolor("#0f172a")
+    ax.set_facecolor("#1e293b")
+    ax.tick_params(colors="#94a3b8")
+    for sp in ax.spines.values():
+        sp.set_edgecolor("#334155")
 
-feature_cols = valid_cols  # Características para el entrenamiento
-X_raw = pivot_clean[feature_cols].values
+    ax.plot(range(1, 31), iters_inertia, "o-", color="#a78bfa", lw=2.5, ms=7)
+    ax.fill_between(range(1, 31), iters_inertia, alpha=0.15, color="#a78bfa")
+    ax.set_title("Training Convergence — Inertia per Iteration", color="white",
+                 fontsize=13, pad=12)
+    ax.set_xlabel("Iteration", color="#94a3b8")
+    ax.set_ylabel("Inertia", color="#94a3b8")
+    ax.grid(True, color="#334155", alpha=0.5)
+    plt.tight_layout()
+    plt.savefig(f"{OUT_DIR}/convergence.png", dpi=130,
+                bbox_inches="tight", facecolor="#0f172a")
+    plt.close()
 
-# Generar puntaje promedio compuesto de Gobierno Digital por municipio
-pivot_clean = pivot_clean.copy()
-pivot_clean["gd_score"] = pivot_clean[feature_cols].mean(axis=1)
+    return km
 
-# Re-inyectar el percentil mapeado para el resumen final del JSON
-if has_percentil:
-    pct_map = df21.groupby(["municipio", "departamento"])["percentil_grupo_par"].mean().to_dict()
-    pivot_clean["percentil_grupo_par"] = pivot_clean.set_index(["municipio", "departamento"]).index.map(pct_map)
 
-# Split 80/20 estructurado únicamente para evaluar consistencia matemática
-X_train, X_test, idx_train, idx_test = train_test_split(
-    X_raw, pivot_clean.index.tolist(),
-    test_size=0.20, random_state=42
-)
+# ═══════════════════════════════════════════════════════════════════════════════
+# 5 ▸ VALIDATION
+# ═══════════════════════════════════════════════════════════════════════════════
 
-print(f"Total municipios procesados: {len(pivot_clean)}")
-print(f"Train: {len(X_train)} | Test: {len(X_test)}")
+def validate(km, X_train, X_val):
+    train_labels = km.predict(X_train)
+    val_labels   = km.predict(X_val)
 
-# ─── 2. PREPROCESSING ────────────────────────────────────────────────────────
-scaler = StandardScaler()
-X_train_sc = scaler.fit_transform(X_train)
-X_test_sc  = scaler.transform(X_test)
-X_all_sc   = scaler.transform(X_raw)
+    metrics = {
+        "train_silhouette": silhouette_score(X_train, train_labels),
+        "val_silhouette":   silhouette_score(X_val,   val_labels),
+        "train_db":         davies_bouldin_score(X_train, train_labels),
+        "val_db":           davies_bouldin_score(X_val,   val_labels),
+        "inertia":          km.inertia_,
+        "n_iter":           km.n_iter_,
+    }
+    return metrics, train_labels
 
-# PCA → 2D for visualisation
-pca = PCA(n_components=2, random_state=42)
-X_train_pca = pca.fit_transform(X_train_sc)
-X_all_pca   = pca.transform(X_all_sc)
-pca_var = [round(v * 100, 1) for v in pca.explained_variance_ratio_]
 
-# ─── 3. HYPERPARAMETER SEARCH — best k via Elbow + Silhouette ────────────────
-K_RANGE = range(2, 9)
-inertias, sil_scores, grid_results = [], [], []
+# ═══════════════════════════════════════════════════════════════════════════════
+# 6 ▸ VISUALISATIONS (PCA scatter, cluster profiles, heatmap, pie)
+# ═══════════════════════════════════════════════════════════════════════════════
 
-for k in K_RANGE:
-    km = KMeans(n_clusters=k, random_state=42, n_init=10)
-    labels = km.fit_predict(X_train_sc)
-    inertia = km.inertia_
-    sil = round(silhouette_score(X_train_sc, labels), 4) if k > 1 else None
-    dbi = round(davies_bouldin_score(X_train_sc, labels), 4)
-    chi = round(calinski_harabasz_score(X_train_sc, labels), 2)
-    inertias.append(round(inertia, 2))
-    if sil: sil_scores.append(sil)
-    grid_results.append({
-        "k": k,
-        "inertia": round(inertia, 2),
-        "silhouette": sil,
-        "davies_bouldin": dbi,
-        "calinski_harabasz": chi,
-        "is_best": False,
-    })
+def build_visualisations(X_scaled, labels, data_df, features):
+    # ── PCA 2D ────────────────────────────────────────────────────────────────
+    pca = PCA(n_components=2, random_state=RANDOM_STATE)
+    X2  = pca.fit_transform(X_scaled)
 
-# Best k = highest silhouette (with preference for 3–4 interpretable clusters)
-best_idx = int(np.argmax(sil_scores))
-best_k   = list(K_RANGE)[best_idx]
-grid_results[best_idx]["is_best"] = True
+    fig, ax = plt.subplots(figsize=(12, 8))
+    fig.patch.set_facecolor("#0f172a")
+    ax.set_facecolor("#1e293b")
+    ax.tick_params(colors="#94a3b8")
+    for sp in ax.spines.values():
+        sp.set_edgecolor("#334155")
 
-print(f"Best k: {best_k}  | Silhouette: {sil_scores[best_idx]}")
+    for c in range(K_FINAL):
+        mask = labels == c
+        ax.scatter(X2[mask, 0], X2[mask, 1], c=PALETTE[c],
+                   label=f"Cluster {c} — {CLUSTER_LABELS[c]} (n={mask.sum()})",
+                   alpha=0.72, s=35, edgecolors="none")
 
-# ─── 4. TRAINING — final model on full dataset ────────────────────────────────
-km_final = KMeans(n_clusters=best_k, random_state=42, n_init=20)
-km_final.fit(X_train_sc)
+    centers_2d = pca.transform(km_global.cluster_centers_)
+    for c in range(K_FINAL):
+        ax.scatter(*centers_2d[c], marker="*", s=350, c=PALETTE[c],
+                   edgecolors="white", lw=1.5, zorder=5)
 
-labels_all   = km_final.predict(X_all_sc)
-labels_train = km_final.predict(X_train_sc)
-labels_test  = km_final.predict(X_test_sc)
+    ax.set_title("K-Means Clusters — PCA 2D Projection", color="white",
+                 fontsize=14, pad=14)
+    ax.set_xlabel(
+        f"PC1 ({pca.explained_variance_ratio_[0]*100:.1f}% variance)",
+        color="#94a3b8")
+    ax.set_ylabel(
+        f"PC2 ({pca.explained_variance_ratio_[1]*100:.1f}% variance)",
+        color="#94a3b8")
+    ax.legend(facecolor="#1e293b", labelcolor="white", fontsize=9)
+    ax.grid(True, color="#334155", alpha=0.4)
+    plt.tight_layout()
+    plt.savefig(f"{OUT_DIR}/pca_scatter.png", dpi=130,
+                bbox_inches="tight", facecolor="#0f172a")
+    plt.close()
 
-pivot_clean = pivot_clean.copy()
-pivot_clean["cluster"] = labels_all
+    # ── Cluster profiles bar ──────────────────────────────────────────────────
+    cluster_df    = data_df.copy()
+    cluster_df["cluster"] = labels
+    cluster_means = cluster_df.groupby("cluster")[features].mean()
 
-# ─── 5. VALIDATION METRICS ────────────────────────────────────────────────────
-sil_final  = round(silhouette_score(X_all_sc, labels_all), 4)
-dbi_final  = round(davies_bouldin_score(X_all_sc, labels_all), 4)
-chi_final  = round(calinski_harabasz_score(X_all_sc, labels_all), 2)
+    x     = np.arange(len(features))
+    width = 0.2
 
-sil_train  = round(silhouette_score(X_train_sc, labels_train), 4)
-sil_test   = round(silhouette_score(X_test_sc,  labels_test),  4)
+    fig, ax = plt.subplots(figsize=(13, 6))
+    fig.patch.set_facecolor("#0f172a")
+    ax.set_facecolor("#1e293b")
+    ax.tick_params(colors="#94a3b8")
+    for sp in ax.spines.values():
+        sp.set_edgecolor("#334155")
 
-print(f"Silhouette (all): {sil_final} | DBI: {dbi_final} | CHI: {chi_final}")
-print(f"Silhouette train: {sil_train} | test: {sil_test}")
+    for i, (idx, row) in enumerate(cluster_means.iterrows()):
+        ax.bar(x + i * width, row.values, width,
+               label=f"Cluster {idx} — {CLUSTER_LABELS[idx]}",
+               color=PALETTE[i], alpha=0.88)
 
-# ─── 6. RISK ASSIGNMENT ────────────────────────────────────────────────────────
-# Rank clusters by mean GD score → lowest = Alto, highest = Bajo
-cluster_means = (
-    pivot_clean.groupby("cluster")["gd_score"].mean().sort_values()
-)
-n = len(cluster_means)
-RISK_MAP = {}
-LABELS_MAP = {}
-risk_names = ["Alto", "Medio-Alto", "Medio-Bajo", "Bajo"]
-# Use only as many risk labels as there are clusters
-risk_labels_used = risk_names[:n] if n <= 4 else risk_names + [f"Nivel {i}" for i in range(5, n+1)]
+    ax.set_xticks(x + width * 1.5)
+    ax.set_xticklabels(features, color="#94a3b8", rotation=20)
+    ax.set_title("Average Score per Sub-Index by Cluster", color="white",
+                 fontsize=14, pad=12)
+    ax.set_ylabel("Mean Score (0–100)", color="#94a3b8")
+    ax.legend(facecolor="#1e293b", labelcolor="white", fontsize=9)
+    ax.grid(True, axis="y", color="#334155", alpha=0.5)
+    plt.tight_layout()
+    plt.savefig(f"{OUT_DIR}/cluster_profiles.png", dpi=130,
+                bbox_inches="tight", facecolor="#0f172a")
+    plt.close()
 
-for rank, cluster_id in enumerate(cluster_means.index):
-    RISK_MAP[int(cluster_id)]   = risk_labels_used[rank]
-    LABELS_MAP[int(cluster_id)] = f"Cluster {cluster_id} — {risk_labels_used[rank]}"
+    # ── Heatmap ───────────────────────────────────────────────────────────────
+    fig, ax = plt.subplots(figsize=(10, 5))
+    fig.patch.set_facecolor("#0f172a")
+    ax.set_facecolor("#1e293b")
 
-pivot_clean["risk"]  = pivot_clean["cluster"].map(RISK_MAP)
-pivot_clean["label"] = pivot_clean["cluster"].map(LABELS_MAP)
+    im = ax.imshow(cluster_means.values, cmap="RdYlGn",
+                   aspect="auto", vmin=20, vmax=100)
+    ax.set_xticks(range(len(features)))
+    ax.set_xticklabels(features, color="white", fontsize=11)
+    ax.set_yticks(range(K_FINAL))
+    ax.set_yticklabels([f"Cluster {c}" for c in range(K_FINAL)],
+                       color="white", fontsize=11)
+    for i in range(K_FINAL):
+        for j in range(len(features)):
+            ax.text(j, i, f"{cluster_means.values[i,j]:.1f}",
+                    ha="center", va="center",
+                    color="black", fontweight="bold", fontsize=10)
 
-# ─── 7. BUILD OUTPUT JSON ──────────────────────────────────────────────────────
+    cbar = plt.colorbar(im, ax=ax, shrink=0.8)
+    cbar.ax.tick_params(colors="white")
+    ax.set_title("Cluster Mean Scores Heatmap (by Sub-Index)",
+                 color="white", fontsize=13, pad=12)
+    plt.tight_layout()
+    plt.savefig(f"{OUT_DIR}/heatmap.png", dpi=130,
+                bbox_inches="tight", facecolor="#0f172a")
+    plt.close()
 
-# 7a. Cluster profiles
-cluster_profiles = []
-RISK_COLORS = {
-    "Alto": "#dc2626", "Medio-Alto": "#f59e0b",
-    "Medio-Bajo": "#3b82f6", "Bajo": "#16a34a"
-}
-
-for cid in sorted(pivot_clean["cluster"].unique()):
-    grp = pivot_clean[pivot_clean["cluster"] == cid]
-    risk = RISK_MAP[int(cid)]
-    means_dict = {c: round(float(grp[c].mean()), 2) for c in feature_cols}
-    means_dict["Gobierno Digital"] = round(float(grp["gd_score"].mean()), 2)
-    top_depts = grp["departamento"].value_counts().head(3).to_dict()
-    cluster_profiles.append({
-        "cluster_id": int(cid),
-        "label": LABELS_MAP[int(cid)],
-        "risk": risk,
-        "color": RISK_COLORS.get(risk, "#6366f1"),
-        "size": int(len(grp)),
-        "means": means_dict,
-        "mean_gd": round(float(grp["gd_score"].mean()), 2),
-        "mean_pct": round(float(grp["percentil_grupo_par"].mean()), 1)
-            if "percentil_grupo_par" in pivot_clean.columns else None,
-        "top_departments": {str(k): int(v) for k, v in top_depts.items()},
-    })
-
-# 7b. Scatter data (PCA)
-scatter_data = []
-for i, row in pivot_clean.iterrows():
-    scatter_data.append({
-        "x": round(float(X_all_pca[pivot_clean.index.get_loc(i), 0]), 4),
-        "y": round(float(X_all_pca[pivot_clean.index.get_loc(i), 1]), 4),
-        "municipio":   str(row["municipio"]),
-        "departamento":str(row["departamento"]),
-        "cluster":     int(row["cluster"]),
-        "risk":        str(row["risk"]),
-        "gd_score":    round(float(row["gd_score"]), 2),
-    })
-
-# 7c. Department summary table
-dept_table = (
-    pivot_clean.groupby("departamento")
-    .agg(
-        count=("municipio", "count"),
-        gd_mean=("gd_score", "mean"),
-        dominant_risk=("risk", lambda x: x.value_counts().idxmax()),
+    # ── Pie ───────────────────────────────────────────────────────────────────
+    sizes = [(labels == c).sum() for c in range(K_FINAL)]
+    fig, ax = plt.subplots(figsize=(8, 6))
+    fig.patch.set_facecolor("#0f172a")
+    ax.set_facecolor("#0f172a")
+    wedges, texts, autotexts = ax.pie(
+        sizes,
+        labels=[f"Cluster {c}\n{CLUSTER_LABELS[c]}\n(n={s})"
+                for c, s in enumerate(sizes)],
+        colors=PALETTE,
+        autopct="%1.1f%%",
+        startangle=140,
+        wedgeprops=dict(linewidth=2, edgecolor="#0f172a"),
+        pctdistance=0.82,
     )
-    .reset_index()
-    .sort_values("gd_mean")
-    .rename(columns={"departamento": "DEPARTAMENTO"})
-)
-dept_table["gd_mean"] = dept_table["gd_mean"].round(2)
-dept_table_list = dept_table.to_dict(orient="records")
+    for t in texts:
+        t.set_color("white")
+        t.set_fontsize(9)
+    for a in autotexts:
+        a.set_color("#0f172a")
+        a.set_fontweight("bold")
+    ax.set_title("Cluster Size Distribution", color="white",
+                 fontsize=13, pad=14)
+    plt.tight_layout()
+    plt.savefig(f"{OUT_DIR}/cluster_sizes.png", dpi=130,
+                bbox_inches="tight", facecolor="#0f172a")
+    plt.close()
 
-# 7d. Risk distribution
-risk_dist = pivot_clean["risk"].value_counts().to_dict()
+    return cluster_means
 
-# 7e. Elbow curve data
-elbow_data = [{"k": r["k"], "inertia": r["inertia"]} for r in grid_results]
 
-# 7f. Critical municipalities (Alto risk)
-critical = pivot_clean[pivot_clean["risk"] == "Alto"].copy()
-critical_list = critical[["municipio", "departamento", "gd_score"]].copy()
-critical_list["gd_score"] = critical_list["gd_score"].round(2)
-critical_list = critical_list.sort_values("gd_score").to_dict(orient="records")
+# ═══════════════════════════════════════════════════════════════════════════════
+# 7 ▸ PREDICTION EXAMPLES
+# ═══════════════════════════════════════════════════════════════════════════════
 
-# 7g. Centroids (in original scale) for model summary
-centroids_original = scaler.inverse_transform(km_final.cluster_centers_)
-centroids_dict = []
-for cid in range(best_k):
-    c = {feature_cols[j]: round(float(centroids_original[cid, j]), 2)
-         for j in range(len(feature_cols))}
-    centroids_dict.append({"cluster_id": cid, "centroid": c})
+def generate_predictions(km, scaler, data_df, meta_df, n=8):
+    rng = np.random.default_rng(RANDOM_STATE)
+    idx = rng.choice(len(data_df), n, replace=False)
+    sample = data_df.iloc[idx]
+    pred   = km.predict(scaler.transform(sample))
+    rows   = []
+    for i, (_, row) in enumerate(sample.iterrows()):
+        m = meta_df.iloc[idx[i]]
+        c = pred[i]
+        rows.append({
+            "entity":    m["ENTIDAD"][:55],
+            "dept":      m["DEPARTAMENTO"],
+            "orden":     m["ORDEN"],
+            "cluster":   c,
+            "label":     CLUSTER_LABELS[c],
+            "pol06":     round(row["POL06"], 1),
+            "i82":       round(row["I82"],   1),
+            "i18":       round(row["I18"],   1),
+        })
+    return rows
 
-# 7h. Final JSON
-result = {
-    # Dataset split
-    "total_municipalities": int(len(pivot_clean)),
-    "train_size":           int(len(X_train)),
-    "test_size":            int(len(X_test)),
-    "feature_cols":         feature_cols,
-    "pca_variance":         pca_var,
 
-    # Hyperparameters
-    "best_k":               int(best_k),
-    "grid_results":         grid_results,
-    "elbow_data":           elbow_data,
+# ═══════════════════════════════════════════════════════════════════════════════
+# MAIN  (also used by Flask via get_kmeans_results())
+# ═══════════════════════════════════════════════════════════════════════════════
 
-    # Validation
-    "silhouette":           sil_final,
-    "davies_bouldin":       dbi_final,
-    "calinski_harabasz":    chi_final,
-    "silhouette_train":     sil_train,
-    "silhouette_test":      sil_test,
+km_global   = None   # module-level model kept for visualisations
+scaler_global = None
 
-    # Predictions
-    "n_clusters":           int(best_k),
-    "cluster_profiles":     cluster_profiles,
-    "risk_distribution":    risk_dist,
-    "scatter_data":         scatter_data,
-    "dept_table":           dept_table_list,
-    "critical_municipalities": critical_list,
-    "centroids":            centroids_dict,
-}
+def get_kmeans_results():
+    global km_global, scaler_global
 
-with open("kmeans_results.json", "w", encoding="utf-8") as f:
-    json.dump(result, f, ensure_ascii=False, indent=2)
+    # 1 · Load
+    pivot = load_and_prepare(DATA_PATH)
+    data  = pivot[FEATURES].dropna()
+    meta  = pivot.loc[data.index, ["ENTIDAD", "ORDEN", "DEPARTAMENTO", "MUNICIPIO"]]
+    data.reset_index(drop=True, inplace=True)
+    meta.reset_index(drop=True, inplace=True)
 
-print("\n✓  kmeans_results.json saved successfully")
-print(f"   Clusters: {best_k} | Municipalities: {len(pivot_clean)}")
-print(f"   Risk distribution: {risk_dist}")
+    # 2 · Scale
+    scaler = StandardScaler()
+    X      = scaler.fit_transform(data)
+    scaler_global = scaler
+
+    # 3 · Hyperparameter search
+    _, silhouettes, best_sil_k = hyperparameter_search(X)
+
+    # 4 · Split
+    train_idx, val_idx = split_data(X)
+    X_train = X[train_idx]
+    X_val   = X[val_idx]
+
+    # 5 · Train
+    km = train_kmeans(X_train)
+    km_global = km
+
+    # 6 · Full-dataset labels (for plots)
+    all_labels = km.predict(X)
+
+    # 7 · Validate
+    metrics, _ = validate(km, X_train, X_val)
+
+    # 8 · Visualisations
+    cluster_means = build_visualisations(X, all_labels, data, FEATURES)
+
+    # 9 · Predictions
+    preds = generate_predictions(km, scaler, data, meta)
+
+    # 10 · Comparison table (K=2..6)
+    comparison = []
+    for k in range(2, 7):
+        km_k  = KMeans(n_clusters=k, random_state=RANDOM_STATE, n_init=10)
+        lbls  = km_k.fit_predict(X)
+        comparison.append({
+            "k":          k,
+            "inertia":    round(km_k.inertia_, 1),
+            "silhouette": round(silhouette_score(X, lbls), 4),
+            "db":         round(davies_bouldin_score(X, lbls), 4),
+            "selected":   k == K_FINAL,
+        })
+
+    return {
+        "metrics":       metrics,
+        "cluster_means": cluster_means.round(2).to_dict(),
+        "predictions":   preds,
+        "comparison":    comparison,
+        "n_train":       len(train_idx),
+        "n_val":         len(val_idx),
+        "n_total":       len(data),
+        "best_sil_k":    best_sil_k,
+        "k_final":       K_FINAL,
+        "features":      FEATURES,
+        "cluster_labels": CLUSTER_LABELS,
+    }
+
+
+if __name__ == "__main__":
+    res = get_kmeans_results()
+    print("\n" + "═" * 60)
+    print("  K-MEANS MODEL SUMMARY")
+    print("═" * 60)
+    print(f"  Total entities   : {res['n_total']}")
+    print(f"  Training set     : {res['n_train']}")
+    print(f"  Validation set   : {res['n_val']}")
+    print(f"  Final K          : {res['k_final']}")
+    print(f"  Train Silhouette : {res['metrics']['train_silhouette']:.4f}")
+    print(f"  Val  Silhouette  : {res['metrics']['val_silhouette']:.4f}")
+    print(f"  Train DB Index   : {res['metrics']['train_db']:.4f}")
+    print(f"  Val  DB Index    : {res['metrics']['val_db']:.4f}")
+    print(f"  Inertia (WCSS)   : {res['metrics']['inertia']:.2f}")
+    print(f"  Convergence in   : {res['metrics']['n_iter']} iterations")
+    print("\n  Cluster Assignments:")
+    for c, lbl in res['cluster_labels'].items():
+        print(f"    Cluster {c} → {lbl}")
+    print("\n  Sample Predictions:")
+    for p in res['predictions']:
+        print(f"    [{p['cluster']}] {p['entity'][:45]:<45} POL06={p['pol06']}")
+    print("═" * 60)

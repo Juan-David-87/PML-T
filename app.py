@@ -26,10 +26,14 @@ def data_understanding():
 def data_engineering():
     return render_template("data_engineering.html")
 
-@app.route('/model-engineering/pca')
-def pca():
-    return render_template('model_engineering/Model_PCA.html')
-    
+@app.route("/dbscan-model")
+def dbscan_model():
+    return render_template("dbscan_model.html")
+
+@app.route("/PCA-Model")
+def PCA_Model():
+    return render_template("PCA_Model.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True)

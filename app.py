@@ -26,7 +26,9 @@ def data_understanding():
 def data_engineering():
     return render_template("data_engineering.html")
 
-
+@app.route("/dbscan-model")
+def dbscan_model():
+    return render_template("dbscan_model.html")
 
 
 if __name__ == "__main__":

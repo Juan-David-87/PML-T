@@ -1,0 +1,888 @@
+{% extends 'base.html' %}
+{% block title %}DBSCAN Model — Model Engineering{% endblock %}
+
+{% block content %}
+
+<!-- ── PAGE HERO ─────────────────────────────────────────────────────────── -->
+<section class="py-5" style="background:linear-gradient(135deg,#0f2417 0%,#1a3a26 60%,#0d2b1c 100%);color:#fff;">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <span class="badge bg-success px-3 py-2 mb-3 fs-6">Model Engineering · DBSCAN</span>
+        <h1 class="display-4 fw-bold mb-3">
+          DBSCAN Clustering
+          <span style="color:#4ade80;">Analysis</span>
+        </h1>
+        <p class="lead opacity-75">
+          Density-Based Spatial Clustering of Applications with Noise applied to
+          the <strong>Índice de Gobierno Digital</strong> dataset (VIGENCIA 2021) —
+          identifying digital governance patterns and risk segments across Colombian public entities.
+        </p>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0">
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="rounded-4 p-3 text-center" style="background:rgba(255,255,255,.08);">
+              <div class="fs-2 fw-bold text-success" id="stat-entities">—</div>
+              <div class="small opacity-75">Total Entities</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="rounded-4 p-3 text-center" style="background:rgba(255,255,255,.08);">
+              <div class="fs-2 fw-bold text-success" id="stat-clusters">—</div>
+              <div class="small opacity-75">Clusters Found</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="rounded-4 p-3 text-center" style="background:rgba(255,255,255,.08);">
+              <div class="fs-2 fw-bold text-warning" id="stat-sil">—</div>
+              <div class="small opacity-75">Silhouette Score</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="rounded-4 p-3 text-center" style="background:rgba(255,255,255,.08);">
+              <div class="fs-2 fw-bold text-info" id="stat-noise">—</div>
+              <div class="small opacity-75">Noise Points</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STEP TABS NAV ──────────────────────────────────────────────────────── -->
+<nav class="bg-white border-bottom sticky-top" style="top:72px;z-index:100;">
+  <div class="container">
+    <ul class="nav nav-tabs border-0 flex-nowrap overflow-auto" id="stepTabs">
+      <li class="nav-item">
+        <a class="nav-link active fw-semibold px-4 py-3" href="#sec-split" data-step="split">
+          <i class="bi bi-scissors me-1"></i>Dataset Split
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link fw-semibold px-4 py-3" href="#sec-hyperparams" data-step="hyper">
+          <i class="bi bi-sliders me-1"></i>Hyperparameters
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link fw-semibold px-4 py-3" href="#sec-training" data-step="train">
+          <i class="bi bi-cpu me-1"></i>Training
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link fw-semibold px-4 py-3" href="#sec-validation" data-step="valid">
+          <i class="bi bi-check2-circle me-1"></i>Validation
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link fw-semibold px-4 py-3" href="#sec-predictions" data-step="pred">
+          <i class="bi bi-graph-up me-1"></i>Predictions
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container py-5">
+
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║  SECTION 1 · DATASET SPLIT                                          ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
+<section id="sec-split" class="mb-5">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+         style="width:40px;height:40px;background:#166534;font-size:1.1rem;">1</div>
+    <h2 class="fw-bold mb-0">Dataset Split</h2>
+  </div>
+
+  <div class="row g-4">
+    <!-- Description -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm h-100 p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-database me-2 text-success"></i>Data Preparation</h5>
+        <p class="text-muted">
+          The raw dataset contains <strong>77,163 records</strong> across multiple years and sub-indices.
+          We filtered for <strong>VIGENCIA 2021</strong> (the most recent complete year) and pivoted
+          so each entity has one row with its score per sub-index.
+        </p>
+        <p class="text-muted">
+          Sub-indices present in fewer than 50% of entities were excluded to avoid imputation bias.
+          The final dataset was split <strong>80/20 (train/test)</strong> for stability validation.
+          DBSCAN is fully unsupervised — the split is used only to verify cluster consistency.
+        </p>
+        <div class="mt-3">
+          <h6 class="fw-semibold">Features used (7 sub-indices):</h6>
+          <ul id="feat-list" class="text-muted small ps-3"></ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Split chart -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100 p-4 text-center">
+        <h5 class="fw-bold mb-4">Train / Test Split</h5>
+        <canvas id="splitChart" style="max-height:220px;"></canvas>
+        <div class="row mt-4 text-center g-2">
+          <div class="col-6">
+            <div class="fw-bold fs-4 text-success" id="split-train">—</div>
+            <div class="small text-muted">Train (80%)</div>
+          </div>
+          <div class="col-6">
+            <div class="fw-bold fs-4 text-info" id="split-test">—</div>
+            <div class="small text-muted">Test (20%)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PCA info -->
+    <div class="col-lg-3">
+      <div class="card border-0 shadow-sm h-100 p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-arrows-angle-contract me-2 text-success"></i>PCA Reduction</h5>
+        <p class="text-muted small">StandardScaler normalises all features. PCA reduces to 2D for visualisation.</p>
+        <div class="mt-3">
+          <div class="d-flex justify-content-between mb-1">
+            <span class="small">PC 1</span><span class="small fw-bold text-success" id="pca1">—</span>
+          </div>
+          <div class="progress mb-3" style="height:8px;">
+            <div class="progress-bar bg-success" id="pca1-bar" style="width:0%"></div>
+          </div>
+          <div class="d-flex justify-content-between mb-1">
+            <span class="small">PC 2</span><span class="small fw-bold text-info" id="pca2">—</span>
+          </div>
+          <div class="progress mb-3" style="height:8px;">
+            <div class="progress-bar bg-info" id="pca2-bar" style="width:0%"></div>
+          </div>
+          <div class="alert alert-success-subtle border-0 rounded-3 p-2 small" style="background:#f0fdf4;">
+            <i class="bi bi-info-circle me-1 text-success"></i>
+            PC1 + PC2 capture the majority of variance in the score space.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║  SECTION 2 · HYPERPARAMETER CONFIGURATION                           ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
+<section id="sec-hyperparams" class="mb-5">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+         style="width:40px;height:40px;background:#166534;font-size:1.1rem;">2</div>
+    <h2 class="fw-bold mb-0">Hyperparameter Configuration</h2>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <!-- k-distance -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm p-4">
+        <h5 class="fw-bold mb-1"><i class="bi bi-bezier2 me-2 text-success"></i>k-Distance Graph</h5>
+        <p class="text-muted small mb-3">
+          k=5 nearest-neighbour distances sorted in descending order on the training set.
+          The "elbow" indicates the optimal ε (epsilon) value.
+        </p>
+        <canvas id="kdistChart" style="max-height:260px;"></canvas>
+        <div class="mt-2 text-center">
+          <span class="badge bg-warning text-dark px-3 py-2">
+            <i class="bi bi-arrow-down-circle me-1"></i>
+            Elbow ε = <span id="rec-eps">—</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Best params highlight -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm p-4 h-100">
+        <h5 class="fw-bold mb-3"><i class="bi bi-trophy me-2 text-success"></i>Optimal Parameters</h5>
+        <p class="text-muted small">
+          Grid search over ε × min_samples on the training set. Best configuration selected
+          by highest Silhouette Score with noise ratio below 30%.
+        </p>
+        <div class="row g-3 mt-1">
+          <div class="col-6">
+            <div class="rounded-3 p-3 text-center border border-success-subtle"
+                 style="background:#f0fdf4;">
+              <div class="text-muted small mb-1">Best ε (epsilon)</div>
+              <div class="display-6 fw-bold text-success" id="best-eps">—</div>
+              <div class="text-muted small">neighbourhood radius</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="rounded-3 p-3 text-center border border-success-subtle"
+                 style="background:#f0fdf4;">
+              <div class="text-muted small mb-1">Best min_samples</div>
+              <div class="display-6 fw-bold text-success" id="best-ms">—</div>
+              <div class="text-muted small">core point threshold</div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4">
+          <h6 class="fw-semibold">DBSCAN Key Concepts</h6>
+          <ul class="text-muted small">
+            <li><strong>ε (epsilon):</strong> Maximum distance between two points for neighbourhood.</li>
+            <li><strong>min_samples:</strong> Minimum points to form a dense core region.</li>
+            <li><strong>Core points:</strong> Have ≥ min_samples within ε distance.</li>
+            <li><strong>Border points:</strong> Reachable from a core point but not core themselves.</li>
+            <li><strong>Noise points:</strong> Not reachable from any core point.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid table -->
+  <div class="card border-0 shadow-sm p-4">
+    <h5 class="fw-bold mb-3"><i class="bi bi-table me-2 text-success"></i>Grid Search Results</h5>
+    <div class="table-responsive">
+      <table class="table table-sm table-hover align-middle" id="gridTable">
+        <thead class="table-light">
+          <tr>
+            <th>ε</th>
+            <th>min_samples</th>
+            <th>Clusters</th>
+            <th>Noise %</th>
+            <th>Silhouette ↑</th>
+            <th>Davies-Bouldin ↓</th>
+            <th>Calinski-Harabasz ↑</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="gridTbody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║  SECTION 3 · TRAINING                                               ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
+<section id="sec-training" class="mb-5">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+         style="width:40px;height:40px;background:#166534;font-size:1.1rem;">3</div>
+    <h2 class="fw-bold mb-0">Training Process</h2>
+  </div>
+
+  <div class="row g-4">
+    <!-- Scatter PCA -->
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm p-4">
+        <h5 class="fw-bold mb-1">
+          <i class="bi bi-scatter-chart me-2 text-success"></i>PCA 2D Cluster Visualisation
+        </h5>
+        <p class="text-muted small mb-3">
+          Each point represents one public entity projected onto the first two principal components.
+          Hover over points for details.
+        </p>
+        <div class="mb-2 d-flex gap-2 flex-wrap" id="scatter-legend"></div>
+        <canvas id="scatterChart" style="max-height:400px;"></canvas>
+        <div class="row mt-3 g-3 text-center">
+          <div class="col-4">
+            <div class="fw-bold fs-5 text-success" id="pca1-label">—</div>
+            <div class="small text-muted">PC1 Variance</div>
+          </div>
+          <div class="col-4">
+            <div class="fw-bold fs-5 text-info" id="pca2-label">—</div>
+            <div class="small text-muted">PC2 Variance</div>
+          </div>
+          <div class="col-4">
+            <div class="fw-bold fs-5 text-warning" id="scatter-noise-pct">—</div>
+            <div class="small text-muted">Noise %</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cluster cards -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm p-4 h-100">
+        <h5 class="fw-bold mb-3"><i class="bi bi-layers me-2 text-success"></i>Cluster Profiles</h5>
+        <div id="clusterCards"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sub-index radar / bar -->
+  <div class="row g-4 mt-2">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm p-4">
+        <h5 class="fw-bold mb-1">
+          <i class="bi bi-bar-chart-line me-2 text-success"></i>Mean Score per Sub-index by Cluster
+        </h5>
+        <p class="text-muted small mb-3">Average Gobierno Digital sub-index score per cluster.</p>
+        <canvas id="subindexBar" style="max-height:300px;"></canvas>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-pie-chart me-2 text-success"></i>Entity Distribution</h5>
+        <canvas id="clusterPie" style="max-height:220px;"></canvas>
+        <div id="pie-legend" class="mt-3"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║  SECTION 4 · VALIDATION                                             ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
+<section id="sec-validation" class="mb-5">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+         style="width:40px;height:40px;background:#166534;font-size:1.1rem;">4</div>
+    <h2 class="fw-bold mb-0">Validation Process</h2>
+  </div>
+
+  <div class="row g-4">
+    <!-- Metrics -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm p-4 h-100">
+        <h5 class="fw-bold mb-4"><i class="bi bi-speedometer2 me-2 text-success"></i>Internal Metrics</h5>
+        <!-- Silhouette -->
+        <div class="mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="fw-semibold">Silhouette Score</span>
+            <span class="badge bg-success fs-6 px-3" id="v-sil">—</span>
+          </div>
+          <div class="progress mb-1" style="height:10px;">
+            <div class="progress-bar bg-success" id="sil-bar" style="width:0%"></div>
+          </div>
+          <div class="small text-muted">Range −1 to 1. Higher = more cohesive clusters.</div>
+        </div>
+        <!-- DBI -->
+        <div class="mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="fw-semibold">Davies-Bouldin</span>
+            <span class="badge bg-info fs-6 px-3" id="v-dbi">—</span>
+          </div>
+          <div class="progress mb-1" style="height:10px;">
+            <div class="progress-bar bg-info" id="dbi-bar" style="width:0%"></div>
+          </div>
+          <div class="small text-muted">Lower = better separated clusters.</div>
+        </div>
+        <!-- CHI -->
+        <div class="mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="fw-semibold">Calinski-Harabasz</span>
+            <span class="badge bg-warning text-dark fs-6 px-3" id="v-chi">—</span>
+          </div>
+          <div class="small text-muted">Higher = better defined clusters.</div>
+        </div>
+        <hr>
+        <h6 class="fw-semibold mb-3">Train Subset Stability</h6>
+        <div class="row text-center g-2">
+          <div class="col-6">
+            <div class="fw-bold text-success" id="v-sil-tr">—</div>
+            <div class="small text-muted">Train Silhouette</div>
+          </div>
+          <div class="col-6">
+            <div class="fw-bold text-info" id="v-noise-tr">—</div>
+            <div class="small text-muted">Train Noise %</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metric explanation -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm p-4 h-100">
+        <h5 class="fw-bold mb-3"><i class="bi bi-book me-2 text-success"></i>Interpretation Guide</h5>
+        <div class="mb-3">
+          <span class="badge bg-success mb-1">Silhouette ≈ 0.35</span>
+          <p class="text-muted small">
+            Scores between 0.25–0.50 indicate a <strong>reasonable structure</strong>. The main cluster
+            is dense and well separated from the 5 critical outlier entities. Values close to 0 would
+            indicate overlapping clusters.
+          </p>
+        </div>
+        <div class="mb-3">
+          <span class="badge bg-info mb-1">Davies-Bouldin ≈ 0.59</span>
+          <p class="text-muted small">
+            Values below 1.0 are considered good. A DBI of ~0.59 confirms that the clusters are
+            <strong>well separated</strong> relative to their intra-cluster scatter.
+          </p>
+        </div>
+        <div class="mb-3">
+          <span class="badge bg-warning text-dark mb-1">Calinski-Harabasz ≈ 19</span>
+          <p class="text-muted small">
+            CHI reflects the ratio of between-cluster to within-cluster variance. Given the
+            natural density of this dataset (government entities with similar scores), this value
+            is expected to be moderate.
+          </p>
+        </div>
+        <div class="alert border-0 rounded-3 p-2 small" style="background:#f0fdf4;">
+          <i class="bi bi-lightbulb me-1 text-success"></i>
+          DBSCAN does not optimise cluster count — it discovers structure naturally from density.
+        </div>
+      </div>
+    </div>
+
+    <!-- Noise analysis -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm p-4 h-100">
+        <h5 class="fw-bold mb-3"><i class="bi bi-exclamation-triangle me-2 text-warning"></i>Noise Analysis</h5>
+        <p class="text-muted small">
+          Noise points are entities that do not belong to any dense region.
+          They represent <strong>atypical behaviour</strong> — either exceptionally high or low governance scores.
+        </p>
+        <canvas id="noiseChart" style="max-height:180px;"></canvas>
+        <div class="mt-3 text-center">
+          <div class="fw-bold fs-4" id="noise-count">—</div>
+          <div class="small text-muted">Noise entities (<span id="noise-pct">—</span>% of total)</div>
+        </div>
+        <div class="mt-3 small text-muted">
+          <i class="bi bi-info-circle me-1 text-success"></i>
+          Noise entities are labelled <em>Indeterminado</em> in the risk map and warrant
+          individual expert review.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║  SECTION 5 · PREDICTIONS                                            ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
+<section id="sec-predictions" class="mb-5">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+         style="width:40px;height:40px;background:#166534;font-size:1.1rem;">5</div>
+    <h2 class="fw-bold mb-0">Prediction Generation — Risk Map</h2>
+  </div>
+
+  <!-- Risk distribution cards -->
+  <div class="row g-3 mb-4" id="riskCards"></div>
+
+  <div class="row g-4">
+    <!-- Risk bar -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-bar-chart me-2 text-success"></i>Risk Distribution</h5>
+        <canvas id="riskBar" style="max-height:280px;"></canvas>
+      </div>
+    </div>
+
+    <!-- Department table -->
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0">
+            <i class="bi bi-geo-alt me-2 text-success"></i>Risk by Department
+          </h5>
+          <input type="text" class="form-control form-control-sm w-auto" id="deptSearch"
+                 placeholder="Search department…">
+        </div>
+        <div class="table-responsive" style="max-height:340px;overflow-y:auto;">
+          <table class="table table-sm table-hover align-middle">
+            <thead class="table-light sticky-top">
+              <tr>
+                <th>Department</th>
+                <th class="text-center">Entities</th>
+                <th class="text-center">Dominant Risk</th>
+                <th class="text-end">Avg GD Score</th>
+              </tr>
+            </thead>
+            <tbody id="deptTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Critical entities (cluster 1 / Alto) -->
+  <div class="card border-0 shadow-sm p-4 mt-4">
+    <h5 class="fw-bold mb-2">
+      <i class="bi bi-exclamation-circle me-2 text-danger"></i>
+      Critical Entities — Alto Digital Isolation Risk
+    </h5>
+    <p class="text-muted small mb-3">
+      Entities forming the isolated high-risk cluster: Gobierno Digital score significantly
+      below the national mean. These municipalities require priority infrastructure investment.
+    </p>
+    <div class="table-responsive">
+      <table class="table align-middle" id="criticalTable">
+        <thead class="table-danger">
+          <tr>
+            <th>Entity</th>
+            <th>Municipality</th>
+            <th>Department</th>
+            <th class="text-center">GD Score</th>
+            <th class="text-center">Risk</th>
+          </tr>
+        </thead>
+        <tbody id="criticalTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Methodology note -->
+  <div class="card border-0 shadow-sm p-4 mt-4" style="background:#f0fdf4;border-left:4px solid #16a34a !important;">
+    <h6 class="fw-bold mb-2"><i class="bi bi-info-circle me-2 text-success"></i>Risk Assignment Methodology</h6>
+    <p class="text-muted small mb-0">
+      Clusters are ranked by their mean <em>Gobierno Digital</em> composite score. The lowest-scoring
+      cluster is labelled <strong>Alto</strong> risk, the middle <strong>Medio</strong>, and the
+      highest <strong>Bajo</strong>. Noise entities (DBSCAN outliers) are marked
+      <strong>Indeterminado</strong> pending expert review. This methodology aligns with
+      CRISP-ML's requirement to link model outputs to actionable business decisions —
+      supporting MinTIC's telecommunications infrastructure investment planning.
+    </p>
+  </div>
+</section>
+
+</div><!-- /container -->
+
+<!-- ── TOOLTIP ────────────────────────────────────────────────────────────── -->
+<div id="chartTooltip" class="position-fixed rounded-3 shadow-lg p-3 d-none"
+     style="background:#fff;border:1px solid #e5e7eb;z-index:9999;max-width:240px;pointer-events:none;font-size:.82rem;">
+</div>
+
+<!-- ── CHART.JS + DATA SCRIPT ─────────────────────────────────────────────── -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// ─── Fetch results JSON ────────────────────────────────────────────────────
+fetch("{{ url_for('static', filename='data/dbscan_results.json') }}")
+  .then(r => r.json())
+  .then(d => initPage(d))
+  .catch(e => console.error("Could not load dbscan_results.json", e));
+
+function initPage(d) {
+  // ── Hero stats ──────────────────────────────────────────────────────────
+  document.getElementById("stat-entities").textContent = d.total_entities.toLocaleString();
+  document.getElementById("stat-clusters").textContent = d.n_clusters;
+  document.getElementById("stat-sil").textContent = d.silhouette ?? "N/A";
+  document.getElementById("stat-noise").textContent = d.noise_count;
+
+  // ── Section 1: Split ─────────────────────────────────────────────────────
+  document.getElementById("split-train").textContent = d.train_size.toLocaleString();
+  document.getElementById("split-test").textContent = d.test_size.toLocaleString();
+  document.getElementById("pca1").textContent = d.pca_variance[0] + "%";
+  document.getElementById("pca2").textContent = d.pca_variance[1] + "%";
+  document.getElementById("pca1-bar").style.width = d.pca_variance[0] + "%";
+  document.getElementById("pca2-bar").style.width = d.pca_variance[1] + "%";
+  document.getElementById("pca1-label").textContent = d.pca_variance[0] + "%";
+  document.getElementById("pca2-label").textContent = d.pca_variance[1] + "%";
+  document.getElementById("scatter-noise-pct").textContent = d.noise_pct + "%";
+
+  // Feature list
+  const fl = document.getElementById("feat-list");
+  d.feature_cols.forEach(c => {
+    const li = document.createElement("li"); li.textContent = c; fl.appendChild(li);
+  });
+
+  // Split donut
+  new Chart(document.getElementById("splitChart"), {
+    type: "doughnut",
+    data: {
+      labels: ["Train", "Test"],
+      datasets: [{ data: [d.train_size, d.test_size],
+                   backgroundColor: ["#16a34a","#0ea5e9"],
+                   borderWidth: 0, hoverOffset: 8 }]
+    },
+    options: { plugins: { legend: { display: false } }, cutout: "65%" }
+  });
+
+  // ── Section 2: Hyperparams ───────────────────────────────────────────────
+  document.getElementById("rec-eps").textContent = d.recommended_eps;
+  document.getElementById("best-eps").textContent = d.best_eps;
+  document.getElementById("best-ms").textContent = d.best_min_samples;
+
+  // k-distance
+  new Chart(document.getElementById("kdistChart"), {
+    type: "line",
+    data: {
+      labels: d.kdist_plot.map((_,i)=>i),
+      datasets: [{
+        label: "k-distance",
+        data: d.kdist_plot,
+        borderColor: "#16a34a",
+        backgroundColor: "rgba(22,163,74,.1)",
+        borderWidth: 2,
+        pointRadius: 0,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { display: false },
+        annotation: {}
+      },
+      scales: {
+        x: { title: { display: true, text: "Points (sorted desc)" } },
+        y: { title: { display: true, text: "Distance to 5th neighbour" } }
+      }
+    }
+  });
+
+  // Grid table
+  const tbody = document.getElementById("gridTbody");
+  const sorted_grid = [...d.grid_results].filter(r => r.silhouette !== null).sort((a,b)=>(b.silhouette||0)-(a.silhouette||0));
+  // Show top 20 by silhouette + always include best
+  const show = sorted_grid.slice(0,20);
+  if (!show.find(r=>r.is_best)) {
+    const bst = d.grid_results.find(r=>r.is_best);
+    if (bst) show.push(bst);
+  }
+  show.forEach(r => {
+    const tr = document.createElement("tr");
+    if (r.is_best) tr.classList.add("table-success");
+    tr.innerHTML = `
+      <td>${r.eps}</td>
+      <td>${r.min_samples}</td>
+      <td><span class="badge bg-secondary">${r.n_clusters}</span></td>
+      <td>${r.noise_pct}%</td>
+      <td>${r.silhouette ?? "—"}</td>
+      <td>${r.davies_bouldin ?? "—"}</td>
+      <td>${r.calinski_harabasz ?? "—"}</td>
+      <td>${r.is_best ? '<span class="badge bg-success">Best</span>' : ''}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  // ── Section 3: Training ──────────────────────────────────────────────────
+  const COLORS = {
+    "-1": "#9ca3af",   // noise = grey
+    "0":  "#16a34a",   // cluster 0 = green
+    "1":  "#dc2626",   // cluster 1 = red (Alto)
+    "2":  "#f59e0b",
+    "3":  "#3b82f6",
+  };
+  const RISK_COLORS = { Alto:"#dc2626", Medio:"#f59e0b", Bajo:"#16a34a", Indeterminado:"#9ca3af" };
+
+  // Cluster cards
+  const cc = document.getElementById("clusterCards");
+  d.cluster_profiles.forEach(cp => {
+    const color = COLORS[String(cp.cluster_id)] || "#6366f1";
+    const riskColor = RISK_COLORS[cp.risk] || "#6b7280";
+    const topDepts = Object.entries(cp.top_departments).slice(0,3).map(([k,v])=>`${k} (${v})`).join(", ");
+    cc.innerHTML += `
+      <div class="rounded-3 p-3 mb-3 border" style="border-left:4px solid ${color} !important;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="fw-bold">${cp.label}</span>
+          <div>
+            <span class="badge me-1" style="background:${riskColor};">${cp.risk}</span>
+            <span class="badge bg-light text-dark border">${cp.size.toLocaleString()} entities</span>
+          </div>
+        </div>
+        <div class="small text-muted">
+          <i class="bi bi-graph-up me-1"></i>GD Score: <strong>${cp.means["Gobierno Digital"] ?? "—"}</strong>
+          &nbsp;|&nbsp; Avg Percentile: <strong>${cp.mean_pct}</strong>
+        </div>
+        <div class="small text-muted mt-1">
+          <i class="bi bi-geo me-1"></i>Top: ${topDepts || "—"}
+        </div>
+      </div>`;
+  });
+
+  // Scatter chart
+  const clusterMap = {};
+  d.scatter_data.forEach(pt => {
+    const k = String(pt.cluster);
+    if (!clusterMap[k]) clusterMap[k] = { label: pt.cluster === -1 ? "Noise" : `Cluster ${pt.cluster}`, data: [], color: COLORS[k]||"#6366f1" };
+    clusterMap[k].data.push({ x: pt.x, y: pt.y, entidad: pt.entidad, municipio: pt.municipio, departamento: pt.departamento, risk: pt.risk });
+  });
+
+  const scatterDatasets = Object.values(clusterMap).map(cl => ({
+    label: cl.label,
+    data: cl.data,
+    backgroundColor: cl.color + "bb",
+    pointRadius: cl.label === "Noise" ? 3 : 4,
+    pointHoverRadius: 7
+  }));
+
+  // Legend
+  const legEl = document.getElementById("scatter-legend");
+  Object.values(clusterMap).forEach(cl => {
+    legEl.innerHTML += `<span class="badge px-2 py-1" style="background:${cl.color};">${cl.label}</span>`;
+  });
+
+  const tooltip = document.getElementById("chartTooltip");
+  new Chart(document.getElementById("scatterChart"), {
+    type: "scatter",
+    data: { datasets: scatterDatasets },
+    options: {
+      plugins: {
+        legend: { position: "top" },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const p = ctx.raw;
+              return [`${p.entidad}`, `${p.municipio}, ${p.departamento}`, `Risk: ${p.risk}`];
+            }
+          }
+        }
+      },
+      scales: {
+        x: { title: { display: true, text: "PC1 (" + d.pca_variance[0] + "% variance)" } },
+        y: { title: { display: true, text: "PC2 (" + d.pca_variance[1] + "% variance)" } }
+      }
+    }
+  });
+
+  // Sub-index bar
+  const nonNoise = d.cluster_profiles.filter(c => c.cluster_id !== -1);
+  const shortLabels = d.feature_cols.map(c => {
+    const words = c.split(" ");
+    return words.slice(0, 3).join(" ") + (words.length > 3 ? "…" : "");
+  });
+  new Chart(document.getElementById("subindexBar"), {
+    type: "bar",
+    data: {
+      labels: shortLabels,
+      datasets: nonNoise.map(cp => ({
+        label: cp.label,
+        data: d.feature_cols.map(c => cp.means[c] ?? 0),
+        backgroundColor: COLORS[String(cp.cluster_id)] + "cc",
+        borderColor: COLORS[String(cp.cluster_id)],
+        borderWidth: 1,
+        borderRadius: 4
+      }))
+    },
+    options: {
+      plugins: { legend: { position: "top" } },
+      scales: {
+        y: { beginAtZero: true, max: 100, title: { display: true, text: "Score (0–100)" } },
+        x: { ticks: { maxRotation: 20 } }
+      }
+    }
+  });
+
+  // Pie
+  const pieColors = d.cluster_profiles.map(cp => COLORS[String(cp.cluster_id)]||"#6366f1");
+  new Chart(document.getElementById("clusterPie"), {
+    type: "pie",
+    data: {
+      labels: d.cluster_profiles.map(cp => cp.label),
+      datasets: [{ data: d.cluster_profiles.map(cp => cp.size), backgroundColor: pieColors, borderWidth: 0 }]
+    },
+    options: { plugins: { legend: { display: false } } }
+  });
+  const pieLeg = document.getElementById("pie-legend");
+  d.cluster_profiles.forEach((cp,i)=>{
+    pieLeg.innerHTML += `<div class="d-flex align-items-center gap-2 small mb-1">
+      <div style="width:12px;height:12px;border-radius:50%;background:${pieColors[i]};"></div>
+      <span>${cp.label}: <strong>${cp.size.toLocaleString()}</strong></span>
+    </div>`;
+  });
+
+  // ── Section 4: Validation ────────────────────────────────────────────────
+  document.getElementById("v-sil").textContent = d.silhouette ?? "N/A";
+  document.getElementById("v-dbi").textContent = d.davies_bouldin ?? "N/A";
+  document.getElementById("v-chi").textContent = d.calinski_harabasz ?? "N/A";
+  document.getElementById("v-sil-tr").textContent = d.silhouette_train ?? "N/A";
+  document.getElementById("v-noise-tr").textContent = (d.noise_train_pct ?? "—") + "%";
+  document.getElementById("noise-count").textContent = d.noise_count;
+  document.getElementById("noise-pct").textContent = d.noise_pct;
+
+  if (d.silhouette) {
+    document.getElementById("sil-bar").style.width = ((d.silhouette+1)/2*100) + "%";
+  }
+  if (d.davies_bouldin) {
+    document.getElementById("dbi-bar").style.width = Math.max(0, 100 - d.davies_bouldin*30) + "%";
+  }
+
+  // Noise donut
+  new Chart(document.getElementById("noiseChart"), {
+    type: "doughnut",
+    data: {
+      labels: ["Clustered","Noise"],
+      datasets: [{ data: [d.total_entities - d.noise_count, d.noise_count],
+                   backgroundColor: ["#16a34a","#9ca3af"], borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: { plugins: { legend: { position: "bottom" } }, cutout: "55%" }
+  });
+
+  // ── Section 5: Predictions ───────────────────────────────────────────────
+  const RISK_LABELS = { Alto: "danger", Medio: "warning", Bajo: "success", Indeterminado: "secondary" };
+  const riskIcons   = { Alto: "bi-exclamation-triangle-fill", Medio: "bi-dash-circle", Bajo: "bi-check-circle", Indeterminado: "bi-question-circle" };
+
+  const rcEl = document.getElementById("riskCards");
+  Object.entries(d.risk_distribution).forEach(([risk, count]) => {
+    const bs = RISK_LABELS[risk]||"secondary";
+    const icon = riskIcons[risk]||"bi-circle";
+    rcEl.innerHTML += `
+      <div class="col-6 col-md-3">
+        <div class="card border-0 shadow-sm p-4 text-center h-100">
+          <i class="bi ${icon} fs-2 text-${bs} mb-2"></i>
+          <div class="display-6 fw-bold text-${bs}">${count.toLocaleString()}</div>
+          <div class="fw-semibold mt-1">Risk: ${risk}</div>
+          <div class="small text-muted">${(count/d.total_entities*100).toFixed(1)}% of entities</div>
+        </div>
+      </div>`;
+  });
+
+  // Risk bar
+  new Chart(document.getElementById("riskBar"), {
+    type: "bar",
+    data: {
+      labels: Object.keys(d.risk_distribution),
+      datasets: [{
+        label: "Entities",
+        data: Object.values(d.risk_distribution),
+        backgroundColor: Object.keys(d.risk_distribution).map(r => RISK_COLORS[r]||"#6b7280"),
+        borderRadius: 6, borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      plugins: { legend: { display: false } },
+      scales: { x: { title: { display: true, text: "Number of Entities" } } }
+    }
+  });
+
+  // Dept table
+  const dtbody = document.getElementById("deptTbody");
+  function renderDeptTable(rows) {
+    dtbody.innerHTML = "";
+    rows.forEach(r => {
+      const bs = RISK_LABELS[r.dominant_risk]||"secondary";
+      dtbody.innerHTML += `
+        <tr>
+          <td>${r.DEPARTAMENTO}</td>
+          <td class="text-center">${r.count}</td>
+          <td class="text-center"><span class="badge bg-${bs}">${r.dominant_risk}</span></td>
+          <td class="text-end">${Number(r.gd_mean).toFixed(1)}</td>
+        </tr>`;
+    });
+  }
+  renderDeptTable(d.dept_table);
+
+  document.getElementById("deptSearch").addEventListener("input", e => {
+    const q = e.target.value.toLowerCase();
+    renderDeptTable(d.dept_table.filter(r => r.DEPARTAMENTO.toLowerCase().includes(q)));
+  });
+
+  // Critical entities (cluster 1)
+  const critTbody = document.getElementById("criticalTbody");
+  const critPts = d.scatter_data.filter(p => p.cluster === 1);
+  if (critPts.length === 0) {
+    critTbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No critical cluster detected with current parameters.</td></tr>`;
+  } else {
+    critPts.forEach(p => {
+      critTbody.innerHTML += `
+        <tr>
+          <td>${p.entidad}</td>
+          <td>${p.municipio}</td>
+          <td>${p.departamento}</td>
+          <td class="text-center"><span class="badge bg-danger">${p.gd_score ?? "—"}</span></td>
+          <td class="text-center"><span class="badge bg-danger">Alto</span></td>
+        </tr>`;
+    });
+  }
+
+  // ── Smooth tab scroll ─────────────────────────────────────────────────────
+  document.querySelectorAll("[data-step]").forEach(link => {
+    link.addEventListener("click", e => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute("href"));
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      document.querySelectorAll("[data-step]").forEach(l => l.classList.remove("active"));
+      link.classList.add("active");
+    });
+  });
+}
+</script>
+
+{% endblock %}

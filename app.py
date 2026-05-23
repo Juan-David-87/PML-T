@@ -34,6 +34,9 @@ def dbscan_model():
 def PCA_Model():
     return render_template("PCA_Model.html")
 
+@app.route('/kmeans')
+def kmeans():
+    return render_template('kmeans.html')
 
 if __name__ == "__main__":
     app.run(debug=True)

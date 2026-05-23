@@ -26,8 +26,9 @@ def data_understanding():
 def data_engineering():
     return render_template("data_engineering.html")
 
-
-
+@app.route('/model-engineering/pca')
+def pca():
+    return render_template('model_engineering/Model_PCA.html')
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -38,37 +38,55 @@
             <div class="collapse navbar-collapse" id="menu">
 
             <ul class="navbar-nav mx-auto">
-
+ 
                 <li class="nav-item">
-                    <a class="nav-link" href="/">
-                        Home
-                    </a>
+                    <a class="nav-link" href="/">Home</a>
                 </li>
-
+            
                 <li class="nav-item">
-                    <a class="nav-link" href="/crispml">
-                        CRISP-ML Methodology
-                    </a>
+                    <a class="nav-link" href="/crispml">CRISP-ML Methodology</a>
                 </li>
-
+            
                 <li class="nav-item">
-                    <a class="nav-link" href="/business-understanding">
-                        Business Understanding
-                    </a>
+                    <a class="nav-link" href="/business-understanding">Business Understanding</a>
                 </li>
-
+            
                 <li class="nav-item">
-                    <a class="nav-link" href="/data-understanding">
-                        Data Understanding
-                    </a>
+                    <a class="nav-link" href="/data-understanding">Data Understanding</a>
                 </li>
-
+            
                 <li class="nav-item">
-                    <a class="nav-link" href="/data-engineering">
-                        Data Engineering
-                    </a>
+                    <a class="nav-link" href="/data-engineering">Data Engineering</a>
                 </li>
-
+            
+                <!-- NEW: Model Engineering dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                        Model Engineering
+                    </a>
+                    <ul class="dropdown-menu border shadow-sm">
+                        <li>
+                            <a class="dropdown-item text-muted" href="/model-engineering/kmeans">
+                                <i class="bi bi-circle me-2 opacity-50"></i>K-Means
+                                <span class="badge bg-secondary bg-opacity-25 text-secondary ms-1 small">soon</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item text-muted" href="/model-engineering/dbscan">
+                                <i class="bi bi-circle me-2 opacity-50"></i>DBSCAN
+                                <span class="badge bg-secondary bg-opacity-25 text-secondary ms-1 small">soon</span>
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="/model-engineering/pca">
+                                <i class="bi bi-diagram-3 me-2 text-success"></i>PCA
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            
             </ul>
 
                 <a href="/crispml" class="btn btn-success px-4 rounded-3">

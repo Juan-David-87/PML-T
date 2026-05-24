@@ -1,0 +1,496 @@
+{% extends 'base.html' %}
+
+{% block title %}K-Means Clustering — Model Engineering{% endblock %}
+
+{% block content %}
+
+<style>
+  /* ── Page-scoped design tokens ───────────────────────────────────────────── */
+  :root {
+    --km-bg:       #0f172a;
+    --km-surface:  #1e293b;
+    --km-border:   #334155;
+    --km-muted:    #94a3b8;
+    --km-green:    #22c55e;
+    --km-blue:     #166534;
+    --km-amber:    #f59e0b;
+    --km-red:      #f43f5e;
+    --km-violet:   #a78bfa;
+    --km-c0:       #22c55e;
+    --km-c1:       #166534;
+    --km-c2:       #f43f5e;
+    --km-c3:       #f59e0b;
+  }
+
+  /* ── Hero ───────────────────────────────────────────────────────────────── */
+  .km-hero {
+    background: var(--km-bg);
+    padding: 4rem 0 3rem;
+    border-bottom: 1px solid var(--km-border);
+    position: relative;
+    overflow: hidden;
+  }
+  .km-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 20%, rgba(34,197,94,.12) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 10% 80%, rgba(56,189,248,.10) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .km-badge {
+    display: inline-block;
+    background: rgba(34,197,94,.15);
+    color: var(--km-green);
+    border: 1px solid rgba(34,197,94,.35);
+    border-radius: 50px;
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    padding: .35rem 1rem;
+    margin-bottom: 1.2rem;
+    text-transform: uppercase;
+  }
+  .km-hero h1 { color: #fff; font-weight: 800; }
+  .km-hero h1 span { color: var(--km-green); }
+  .km-hero p   { color: var(--km-muted); max-width: 640px; }
+
+  /* ── Stat cards ─────────────────────────────────────────────────────────── */
+  .stat-cards { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 2.5rem; }
+  .stat-card {
+    background: rgba(20, 83, 45, 0.45);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    border-radius: 12px;
+    padding: 1.1rem 1.6rem;
+    min-width: 150px;
+    flex: 1;
+    backdrop-filter: blur(4px);
+  }
+  .stat-card .label { color: rgba(187, 247, 208, 0.7); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; }
+  .stat-card .value { color: #22c55e; font-size: 1.6rem; font-weight: 800; line-height: 1.1; margin-top: .3rem; }
+  .stat-card .sub   { color: rgba(187, 247, 208, 0.55); font-size: .8rem; }
+
+  /* ── Section wrappers ────────────────────────────────────────────────────── */
+  .km-section {
+    padding: 3.5rem 0;
+    border-bottom: 1px solid #1e293b;
+  }
+  .km-section:last-child { border-bottom: none; }
+  .section-tag {
+    display: inline-block;
+    color: var(--km-green);
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: .5rem;
+  }
+  .section-title { color: #fff; font-weight: 700; }
+  .section-desc  { color: var(--km-muted); }
+
+  /* ── Dark card ───────────────────────────────────────────────────────────── */
+  .dark-card {
+    background: var(--km-surface);
+    border: 1px solid var(--km-border);
+    border-radius: 16px;
+    padding: 1.75rem;
+  }
+  .dark-card h5 { color: #fff; font-weight: 700; }
+  .dark-card p  { color: var(--km-muted); font-size: .93rem; }
+
+  /* ── Code block ──────────────────────────────────────────────────────────── */
+  .km-code {
+    background: #020617;
+    border: 1px solid var(--km-border);
+    border-radius: 12px;
+    padding: 1.4rem 1.6rem;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: .83rem;
+    color: #e2e8f0;
+    overflow-x: auto;
+    white-space: pre;
+    line-height: 1.65;
+  }
+  .km-code .kw  { color: var(--km-violet); }
+  .km-code .fn  { color: var(--km-blue); }
+  .km-code .cm  { color: #475569; font-style: italic; }
+  .km-code .st  { color: var(--km-amber); }
+  .km-code .nb  { color: var(--km-green); }
+
+  /* ── Plot images ─────────────────────────────────────────────────────────── */
+  .km-plot {
+    border-radius: 14px;
+    border: 1px solid var(--km-border);
+    width: 100%;
+    margin-top: 1.2rem;
+  }
+
+  /* ── Metrics table ───────────────────────────────────────────────────────── */
+  .km-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .km-table thead th {
+    background: #0f172a;
+    color: var(--km-muted);
+    font-size: .75rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: .75rem 1rem;
+    border-bottom: 1px solid var(--km-border);
+  }
+  .km-table tbody tr { border-bottom: 1px solid var(--km-border); }
+  .km-table tbody tr:last-child td { border-bottom: none; }
+  .km-table tbody td {
+    padding: .8rem 1rem;
+    color: #e2e8f0;
+    font-size: .9rem;
+    border-bottom: 1px solid var(--km-border);
+  }
+  .km-table tbody tr.selected { background: rgba(34,197,94,.08); }
+  .km-table tbody tr.selected td:first-child { border-left: 3px solid var(--km-green); }
+
+  /* ── Prediction cards ────────────────────────────────────────────────────── */
+  .pred-card {
+    background: var(--km-surface);
+    border: 1px solid var(--km-border);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    margin-bottom: .75rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    transition: border-color .2s;
+  }
+  .pred-card:hover { border-color: var(--km-green); }
+  .pred-badge {
+    min-width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: .85rem; color: #0f172a;
+    flex-shrink: 0;
+  }
+  .c0 { background: var(--km-c0); } .c1 { background: var(--km-c1); }
+  .c2 { background: var(--km-c2); } .c3 { background: var(--km-c3); }
+  .pred-entity { color: #fff; font-size: .9rem; font-weight: 600; line-height: 1.3; }
+  .pred-meta   { color: var(--km-muted); font-size: .8rem; margin-top: .2rem; }
+  .pred-scores { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .4rem; }
+  .pred-score-pill {
+    font-size: .75rem;
+    padding: .15rem .6rem;
+    border-radius: 50px;
+    font-weight: 600;
+    border: 1px solid var(--km-border);
+    color: var(--km-muted);
+  }
+
+  /* ── Cluster legend ──────────────────────────────────────────────────────── */
+  .cluster-legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .cl-item { display: flex; align-items: center; gap: .5rem; }
+  .cl-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  .cl-text { color: var(--km-muted); font-size: .85rem; }
+
+  /* ── console ─────────────────────────────────────────────────────────────── */
+  .km-console {
+    background: #020617;
+    border: 1px solid var(--km-border);
+    border-radius: 12px;
+    padding: 1.4rem 1.6rem;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: .82rem;
+    color: #94a3b8;
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+  .km-console .prompt { color: var(--km-green); }
+  .km-console .accent { color: var(--km-blue); }
+  .km-console .hi     { color: var(--km-amber); }
+  .km-console .ok     { color: var(--km-green); }
+  .km-console .err    { color: var(--km-red); }
+
+  /* ── Step timeline ───────────────────────────────────────────────────────── */
+  .pipeline { display: flex; flex-direction: column; gap: 0; }
+  .pipe-step {
+    display: flex; gap: 1.2rem;
+    position: relative; padding-bottom: 1.8rem;
+  }
+  .pipe-step:last-child { padding-bottom: 0; }
+  .pipe-step:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 19px; top: 40px;
+    width: 2px; bottom: 0;
+    background: var(--km-border);
+  }
+  .pipe-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: .9rem; color: #0f172a;
+    flex-shrink: 0;
+  }
+  .pipe-content h6 { color: #fff; font-weight: 700; margin-bottom: .3rem; }
+  .pipe-content p  { color: var(--km-muted); font-size: .88rem; margin: 0; }
+</style>
+
+<section class="km-hero">
+  <div class="container">
+    <div class="km-badge">⚙ Model Engineering · K-Means</div>
+
+    <h1 class="display-4 fw-bold mb-3">
+      K-Means <span>Clustering</span> Model
+    </h1>
+    <p class="lead mb-0">
+      Unsupervised clustering of Colombian public entities by their
+      Digital Government maturity level across 7 sub-indexes.
+      Results support infrastructure investment prioritisation.
+    </p>
+
+    <div class="stat-cards">
+      <div class="stat-card">
+        <div class="label">Total entities</div>
+        <div class="value">{{ results.n_total|int }}</div>
+        <div class="sub">after feature pivot</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Training set</div>
+        <div class="value">{{ results.n_train|int }}</div>
+        <div class="sub">80 % split</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Validation set</div>
+        <div class="value">{{ results.n_val|int }}</div>
+        <div class="sub">20 % hold-out</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Final K</div>
+        <div class="value">{{ results.k_final }}</div>
+        <div class="sub">chosen clusters</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Val. Silhouette</div>
+        <div class="value">{{ "%.4f"|format(results.metrics.val_silhouette) }}</div>
+        <div class="sub">higher = better</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Val. DB Index</div>
+        <div class="value">{{ "%.4f"|format(results.metrics.val_db) }}</div>
+        <div class="sub">lower = better</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="km-section" style="background:#fff;">
+  <div class="container">
+    <span class="section-tag text-success">1 · Algorithm</span>
+    <h2 class="section-title mb-2" style="color:#0f172a;">What is K-Means?</h2>
+    <p class="section-desc mb-4" style="color:#475569; max-width:680px;">
+      K-Means is an iterative centroid-based algorithm that partitions
+      <em>n</em> observations into <em>K</em> non-overlapping clusters by
+      minimising the within-cluster sum of squares (WCSS / inertia).
+    </p>
+
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="dark-card">
+          <h5 class="mb-4">Training Pipeline</h5>
+          <div class="pipeline">
+            {% set steps = [
+              ('#22c55e', '1', 'Initialise Centroids', 'k-means++ selects K seeds proportionally to distance², reducing poor initialisation risk.'),
+              ('#166534', '2', 'Assign Points', 'Every entity is assigned to its closest centroid using Euclidean distance in standardised feature space.'),
+              ('#f59e0b', '3', 'Update Centroids', 'Each centroid is recalculated as the feature-mean of all entities currently in that cluster.'),
+              ('#a78bfa', '4', 'Check Convergence', 'Steps 2–3 repeat until centroids move less than 1e-4 or max_iter=300 is reached.'),
+              ('#f43f5e', '5', 'Best of 20 Runs', 'n_init=20 independent runs; the run with lowest inertia is kept.')
+            ] %}
+            {% for colour, num, title, desc in steps %}
+            <div class="pipe-step">
+              <div class="pipe-icon" style="background:{{ colour }}">{{ num }}</div>
+              <div class="pipe-content">
+                <h6>{{ title }}</h6>
+                <p>{{ desc }}</p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="km-section" style="background:#f8fafc;">
+  <div class="container">
+    <span class="section-tag">2 · Hyperparameter Configuration</span>
+    <h2 class="section-title mb-2" style="color:#0f172a;">Choosing the Optimal K</h2>
+    <p class="section-desc mb-4" style="color:#475569; max-width:680px;">
+      We swept K from 2 to 10, evaluating each candidate with two
+      complementary criteria: the <strong>Elbow Method</strong> (inertia
+      drop-off) and the <strong>Silhouette Score</strong> (cluster cohesion
+      vs. separation). K = {{ results.k_final }} was selected as the best
+      trade-off between interpretability and cluster quality.
+    </p>
+
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <img src="{{ url_for('static', filename='img/kmeans/elbow_silhouette.png') }}" alt="Elbow and Silhouette plots" class="km-plot">
+      </div>
+      <div class="col-lg-4">
+        <div class="dark-card h-100">
+          <h5 class="mb-3">Hyperparameters</h5>
+          <table class="km-table">
+            <thead><tr><th>Parameter</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>n_clusters</td><td style="color:var(--km-green)">{{ results.k_final }}</td></tr>
+              <tr><td>init</td><td>k-means++</td></tr>
+              <tr><td>n_init</td><td>20</td></tr>
+              <tr><td>max_iter</td><td>300</td></tr>
+              <tr><td>tol</td><td>1e-4</td></tr>
+              <tr><td>random_state</td><td>42</td></tr>
+              <tr><td>features</td><td>{{ results.features | join(', ') }}</td></tr>
+              <tr><td>scaler</td><td>StandardScaler</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="km-section" style="background:#fff;">
+  <div class="container">
+    <span class="section-tag text-success">3 · Training Process</span>
+    <h2 class="section-title mb-2" style="color:#0f172a;">Dataset Split &amp; Convergence</h2>
+    <p class="section-desc mb-4" style="color:#475569; max-width:680px;">
+      Although K-Means is unsupervised (no labels), we apply an 80/20
+      hold-out split: the model is <em>fitted only on the training set</em>
+      and cluster consistency is then verified on the unseen validation set
+      via Silhouette and Davies-Bouldin scores.
+    </p>
+
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <img src="{{ url_for('static', filename='img/kmeans/convergence.png') }}" alt="Convergence plot" class="km-plot">
+      </div>
+      <div class="col-lg-5">
+        <div class="dark-card">
+          <h5 class="mb-3">Split Details</h5>
+          <table class="km-table mb-3">
+            <thead><tr><th>Subset</th><th>Entities</th><th>Share</th></tr></thead>
+            <tbody>
+              <tr><td>Training</td><td style="color:var(--km-green)">{{ results.n_train }}</td><td>80 %</td></tr>
+              <tr><td>Validation</td><td style="color:var(--km-blue)">{{ results.n_val }}</td><td>20 %</td></tr>
+              <tr><td>Total</td><td>{{ results.n_total }}</td><td>100 %</td></tr>
+            </tbody>
+          </table>
+          <h5 class="mb-3 mt-4">Training Outcome</h5>
+          <table class="km-table">
+            <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Final Inertia</td><td style="color:var(--km-amber)">{{ "%.2f"|format(results.metrics.inertia) }}</td></tr>
+              <tr><td>Iterations</td><td style="color:var(--km-amber)">{{ results.metrics.n_iter }}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="km-section" style="background:#f8fafc;">
+  <div class="container">
+    <span class="section-tag">4 · Evaluation Metrics</span>
+    <h2 class="section-title mb-2" style="color:#0f172a;">Model Performance</h2>
+    <p class="section-desc mb-4" style="color:#475569; max-width:680px;">
+      Análisis profundo de las métricas de evaluación del modelo K-Means. 
+      Comparamos el rendimiento del conjunto de entrenamiento frente al conjunto de validación 
+      para asegurar que los clústeres formados son coherentes, bien separados y sin sobreajuste.
+    </p>
+
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="dark-card h-100">
+          <h5 class="mb-3" style="color:var(--km-blue);">Silhouette Score</h5>
+          <p>Mide qué tan similar es un objeto a su propio clúster (cohesión) comparado con otros clústeres (separación). Varía de <strong>-1 a 1</strong>.</p>
+          <table class="km-table mt-3">
+            <tbody>
+              <tr><td>Training</td><td style="color:var(--km-blue)">{{ "%.4f"|format(results.metrics.train_silhouette) }}</td></tr>
+              <tr><td>Validation</td><td style="color:var(--km-blue)">{{ "%.4f"|format(results.metrics.val_silhouette) }}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="dark-card h-100">
+          <h5 class="mb-3" style="color:var(--km-amber);">Davies-Bouldin Index</h5>
+          <p>Calcula la relación entre la dispersión intra-clúster y la separación inter-clúster. <strong>Un valor más bajo es mejor</strong>.</p>
+          <table class="km-table mt-3">
+            <tbody>
+              <tr><td>Training</td><td style="color:var(--km-amber)">{{ "%.4f"|format(results.metrics.train_db) }}</td></tr>
+              <tr><td>Validation</td><td style="color:var(--km-amber)">{{ "%.4f"|format(results.metrics.val_db) }}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="dark-card h-100">
+          <h5 class="mb-3" style="color:var(--km-red);">Inertia (WCSS)</h5>
+          <p>Suma de los cuadrados de las distancias. Mide la compacidad interna. <strong>Menor es mejor</strong>, pero disminuye al aumentar K.</p>
+          <table class="km-table mt-3">
+            <tbody>
+              <tr><td>WCSS Total</td><td style="color:var(--km-red)">{{ "%.2f"|format(results.metrics.inertia) }}</td></tr>
+              <tr><td>K Óptimo Usado</td><td>{{ results.k_final }}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="km-section" style="background:#fff;">
+  <div class="container">
+    <span class="section-tag text-success">5 · Visualisations</span>
+    <h2 class="section-title mb-2" style="color:#0f172a;">Cluster Analysis &amp; Profiles</h2>
+    <p class="section-desc mb-4" style="color:#475569; max-width:680px;">
+      Exploración visual de la distribución espacial de los clústeres, promedios de los subíndices que definen cada grupo y el tamaño poblacional.
+    </p>
+    <div class="row g-4 mb-4">
+      <div class="col-lg-6">
+        <div class="dark-card p-4">
+          <h5 class="mb-3">PCA 2D Projection</h5>
+          <img src="{{ url_for('static', filename='img/kmeans/pca_scatter.png') }}" class="img-fluid rounded border border-secondary" alt="PCA Scatter">
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="dark-card p-4">
+          <h5 class="mb-3">Cluster Profiles (Bar Chart)</h5>
+          <img src="{{ url_for('static', filename='img/kmeans/cluster_profiles.png') }}" class="img-fluid rounded border border-secondary" alt="Cluster Profiles">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="km-section" style="background:#f8fafc;">
+  <div class="container">
+    <span class="section-tag">6 · Inference</span>
+    <h2 class="section-title mb-2" style="color:#0f172a;">Sample Predictions</h2>
+    <div class="row">
+      <div class="col-12">
+        {% for p in results.predictions %}
+        <div class="pred-card">
+          <div class="pred-badge c{{ p.cluster }}">{{ p.cluster }}</div>
+          <div>
+            <div class="pred-entity">{{ p.entity }}</div>
+            <div class="pred-meta">{{ p.dept }} — Orden: {{ p.orden }} | Etiqueta: <strong style="color:var(--km-green);">{{ p.label }}</strong></div>
+            <div class="pred-scores">
+              <span class="pred-score-pill">POL06: {{ p.pol06 }}</span>
+              <span class="pred-score-pill">I82: {{ p.i82 }}</span>
+              <span class="pred-score-pill">I18: {{ p.i18 }}</span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

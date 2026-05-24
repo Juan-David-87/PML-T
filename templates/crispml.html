@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+
+{% block title %}CRISP-ML Methodology{% endblock %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+<section class="py-5 bg-light border-bottom">
+
+    <div class="container">
+
+        <div class="row align-items-center">
+
+            <div class="col-lg-8">
+
+                <h1 class="display-4 fw-bold">
+                    CRISP-ML Methodology
+                </h1>
+
+                <p class="lead text-muted mt-4">
+                    This section describes the CRISP-ML methodology used throughout
+                    the lifecycle of the BrechaDigital CO project.
+                    The methodology provides a structured and iterative framework
+                    for understanding the business problem, preparing the data,
+                    engineering machine learning models, evaluating performance,
+                    and deploying analytical solutions focused on identifying
+                    municipalities at risk of digital isolation in Colombia.
+                </p>
+
+                <a href="/business-understanding" class="btn btn-success px-4 py-2 rounded-3 mt-3">
+                    Explore Project Phases
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- INTRODUCTION -->
+<section class="py-5">
+
+    <div class="container">
+
+        <div class="row">
+
+            <div class="col-lg-10">
+
+                <h2 class="fw-bold mb-4">
+                    What is CRISP-ML?
+                </h2>
+
+                <p class="text-muted">
+                    CRISP-ML(Q) is an evolution of the traditional CRISP-DM methodology,
+                    specifically adapted for modern Machine Learning projects.
+                    Unlike traditional data mining methodologies, CRISP-ML emphasizes
+                    model quality assurance, reproducibility, deployment,
+                    monitoring, and continuous improvement.
+                </p>
+
+                <p class="text-muted">
+                    In this project, the methodology was applied to analyze territorial,
+                    institutional, and digital government indicators in Colombia in order
+                    to classify municipalities according to their level of digital isolation risk.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- PHASES -->
+<section class="py-5 bg-light">
+
+    <div class="container">
+
+        <div class="text-center mb-5">
+
+            <h2 class="fw-bold">
+                CRISP-ML Project Phases
+            </h2>
+
+            <p class="text-muted mt-3">
+                The project follows a structured lifecycle composed of multiple
+                iterative and interconnected phases.
+            </p>
+
+        </div>
+
+        <div class="row g-4">
+
+            <!-- Business & Data Understanding -->
+            <div class="col-md-6">
+
+                <div class="card h-100 shadow-sm border-0">
+
+                    <div class="card-body p-4">
+
+                        <div class="mb-3">
+                            <i class="bi bi-search fs-1 text-success"></i>
+                        </div>
+
+                        <h4 class="fw-bold">
+                            Business & Data Understanding
+                        </h4>
+
+                        <p class="text-muted">
+                            The first phase focused on understanding the digital divide
+                            problem in Colombia and translating business needs into
+                            analytical objectives.
+                        </p>
+
+                        <ul class="text-muted">
+                            <li>Identification of the digital isolation problem</li>
+                            <li>Definition of project objectives</li>
+                            <li>Research question formulation</li>
+                            <li>Dataset exploration and feasibility analysis</li>
+                            <li>Understanding territorial and institutional variables</li>
+                        </ul>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Data Engineering -->
+            <div class="col-md-6">
+
+                <div class="card h-100 shadow-sm border-0">
+
+                    <div class="card-body p-4">
+
+                        <div class="mb-3">
+                            <i class="bi bi-database-gear fs-1 text-success"></i>
+                        </div>
+
+                        <h4 class="fw-bold">
+                            Data Engineering
+                        </h4>
+
+                        <p class="text-muted">
+                            During this phase, the dataset was cleaned, transformed,
+                            normalized, and prepared for machine learning implementation.
+                        </p>
+
+                        <ul class="text-muted">
+                            <li>Data cleaning and standardization</li>
+                            <li>Missing value handling</li>
+                            <li>Feature engineering</li>
+                            <li>Encoding categorical variables</li>
+                            <li>Scaling and normalization</li>
+                        </ul>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Model Engineering -->
+            <div class="col-md-6">
+
+                <div class="card h-100 shadow-sm border-0">
+
+                    <div class="card-body p-4">
+
+                        <div class="mb-3">
+                            <i class="bi bi-cpu fs-1 text-success"></i>
+                        </div>
+
+                        <h4 class="fw-bold">
+                            Model Engineering
+                        </h4>
+
+                        <p class="text-muted">
+                            Multiple machine learning models were explored to identify,
+                            classify, and analyze municipalities with digital isolation risk.
+                        </p>
+
+                        <ul class="text-muted">
+                            <li>K-Means clustering for territorial classification</li>
+                            <li>DBSCAN for anomaly and density detection</li>
+                            <li>PCA for dimensionality reduction</li>
+                            <li>Model training and parameter adjustment</li>
+                            <li>Performance validation</li>
+                        </ul>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Evaluation & Deployment -->
+            <div class="col-md-6">
+
+                <div class="card h-100 shadow-sm border-0">
+
+                    <div class="card-body p-4">
+
+                        <div class="mb-3">
+                            <i class="bi bi-bar-chart-line fs-1 text-success"></i>
+                        </div>
+
+                        <h4 class="fw-bold">
+                            Evaluation, Deployment & Monitoring
+                        </h4>
+
+                        <p class="text-muted">
+                            The final stages focused on validating model quality,
+                            deploying the Flask application, and ensuring future
+                            scalability and monitoring.
+                        </p>
+
+                        <ul class="text-muted">
+                            <li>Cross-validation and evaluation metrics</li>
+                            <li>Risk and bias analysis</li>
+                            <li>Flask web application deployment</li>
+                            <li>Continuous monitoring and maintenance</li>
+                            <li>Documentation and reproducibility</li>
+                        </ul>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- MODELS SECTION -->
+<section class="py-5">
+
+    <div class="container">
+
+        <div class="row align-items-center">
+
+            <div class="col-lg-6">
+
+                <h2 class="fw-bold mb-4">
+                    Machine Learning Models Used
+                </h2>
+
+                <p class="text-muted">
+                    The project incorporates three main unsupervised learning models
+                    to analyze digital isolation risk patterns across Colombian municipalities.
+                </p>
+
+                <div class="mt-4">
+
+                    <h5 class="fw-bold">
+                        K-Means
+                    </h5>
+
+                    <p class="text-muted">
+                        Used to classify municipalities into different digital isolation
+                        risk groups such as High, Medium, and Low risk.
+                    </p>
+
+                    <h5 class="fw-bold mt-4">
+                        DBSCAN
+                    </h5>
+
+                    <p class="text-muted">
+                        Used to detect isolated municipalities, anomalies,
+                        and geographically vulnerable clusters.
+                    </p>
+
+                    <h5 class="fw-bold mt-4">
+                        PCA
+                    </h5>
+
+                    <p class="text-muted">
+                        Used to reduce dimensionality and simplify highly correlated
+                        digital government indicators before clustering analysis.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-6">
+
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body p-5">
+
+                        <h4 class="fw-bold mb-4">
+                            Project Goal
+                        </h4>
+
+                        <p class="text-muted">
+                            The main goal of BrechaDigital CO is to support
+                            evidence-based decision making by identifying
+                            municipalities with high vulnerability to digital exclusion.
+                        </p>
+
+                        <p class="text-muted">
+                            Through the integration of machine learning,
+                            open government data, and territorial analysis,
+                            the platform helps visualize technological inequalities
+                            and contributes to future digital inclusion strategies
+                            in Colombia.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- FINAL SECTION -->
+<section class="py-5 bg-dark text-white">
+
+    <div class="container text-center">
+
+        <h2 class="fw-bold">
+            BrechaDigital CO
+        </h2>
+
+        <p class="mt-4">
+            A Machine Learning project focused on analyzing and classifying
+            digital isolation risk in Colombia through the CRISP-ML methodology.
+        </p>
+
+        <a href="/data-engineering" class="btn btn-success px-4 py-2 rounded-3 mt-3">
+            Continue to Data Engineering
+        </a>
+
+    </div>
+
+</section>
+
+{% endblock %}

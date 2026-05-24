@@ -1,0 +1,93 @@
+body{
+    background-color: #f7f7f5;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.logo-text{
+    font-size: 1.5rem;
+}
+
+.logo-text span{
+    color: #198754;
+}
+
+.hero-section{
+    padding-top: 50px;
+}
+
+.hero-title{
+    line-height: 1.1;
+}
+
+.dashboard-card{
+    background: #0d3b2e;
+    color: white;
+    padding: 40px;
+    border-radius: 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.progress{
+    height: 10px;
+    border-radius: 20px;
+    background-color: rgba(255,255,255,0.15);
+}
+
+.progress-bar{
+    border-radius: 20px;
+}
+
+.nav-link{
+    font-weight: 500;
+}
+
+.nav-link:hover{
+    color: #198754 !important;
+}
+.dashboard-subtitle{
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 1px;
+}
+
+.dashboard-description{
+    color: rgba(255,255,255,0.75);
+    font-size: 1rem;
+}
+.problem-image-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.problem-image{
+    width: 100%;
+    max-width: 600px;
+    object-fit: cover;
+    border-radius: 25px;
+    transition: transform 0.3s ease;
+}
+
+.problem-image:hover{
+    transform: scale(1.02);
+}
+.feasibility-image-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.feasibility-image{
+    width: 100%;
+    max-width: 650px;
+    object-fit: cover;
+    border-radius: 25px;
+    transition: transform 0.3s ease;
+}
+
+.feasibility-image:hover{
+    transform: scale(1.02);
+}
+
+.hero-row{
+    min-height: 75vh;
+}

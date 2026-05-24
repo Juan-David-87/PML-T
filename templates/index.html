@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+<section class="hero-section">
+
+    <div class="container">
+
+        <div class="row align-items-center hero-row">
+
+            <div class="col-lg-6">
+
+                <span class="badge bg-success-subtle text-success px-3 py-2 mb-4">
+                    Active Project · Data Science
+                </span>
+
+                <h1 class="display-2 fw-bold hero-title">
+                    Classifying regions with
+                    <span class="text-success">
+                        risk of digital
+                    </span>
+                    isolation in Colombia
+                </h1>
+
+                <p class="lead text-muted mt-4">
+                    A data-driven platform focused on analyzing and classifying 
+                    regions at risk of digital isolation in Colombia using open 
+                    connectivity datasets, territorial indicators, and machine 
+                    learning methodologies.
+                </p>
+
+                <div class="d-flex gap-3 mt-5">
+
+                    <a href="/crispml" class="btn btn-success btn-lg px-5">
+                        Explore Methodology
+                    </a>
+
+                    <a href="/business-understanding" class="btn btn-outline-secondary btn-lg px-5">
+                        Business Understanding
+                    </a>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-6">
+
+                <div class="dashboard-card">
+
+                    <h5 class="dashboard-subtitle text-uppercase mb-4">
+                        Regional Coverage
+                    </h5>
+
+                    <h2 class="display-1 fw-bold">
+                        34%
+                    </h2>
+
+                    <p class="dashboard-description">
+                        municipalities without stable connectivity
+                    </p>
+
+                    <div class="mt-4">
+
+                        <div class="mb-3">
+
+                            <div class="d-flex justify-content-between">
+                                <span>Amazon Region</span>
+                                <span>78%</span>
+                            </div>
+
+                            <div class="progress">
+                                <div class="progress-bar bg-danger" style="width: 78%"></div>
+                            </div>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <div class="d-flex justify-content-between">
+                                <span>Pacific Region</span>
+                                <span>65%</span>
+                            </div>
+
+                            <div class="progress">
+                                <div class="progress-bar bg-warning" style="width: 65%"></div>
+                            </div>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <div class="d-flex justify-content-between">
+                                <span>Caribbean Region</span>
+                                <span>38%</span>
+                            </div>
+
+                            <div class="progress">
+                                <div class="progress-bar bg-success" style="width: 38%"></div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- PROBLEM STATEMENT -->
+<section class="py-4 bg-white">
+
+    <div class="container">
+
+        <div class="row align-items-center">
+
+            <!-- TEXT -->
+            <div class="col-lg-6">
+
+                <span class="text-success fw-semibold">
+                    Problem Statement
+                </span>
+
+                <h2 class="display-5 fw-bold mt-3 mb-4">
+                    Understanding Digital Isolation Risk in Colombia
+                </h2>
+
+                <p class="lead text-muted">
+                    The main objective of this project is to identify 
+                    and classify municipalities or regions in Colombia 
+                    with a high probability of digital isolation in order 
+                    to support decision-making processes related to 
+                    telecommunications infrastructure investment.
+                </p>
+
+                <p class="text-muted mt-4">
+                    Despite the growth of digital technologies, many regions 
+                    still experience limited access to stable connectivity, 
+                    technological infrastructure, and digital services. 
+                    This creates territorial inequalities that directly affect 
+                    education, communication, economic opportunities, and 
+                    access to information.
+                </p>
+
+            </div>
+
+            <!-- IMAGE -->
+            <div class="col-lg-6">
+
+                <div class="problem-image-container">
+
+                    <img 
+                        src="{{ url_for('static', filename='img/colconexion.jpg') }}" 
+                        alt="Digital connectivity in Colombia"
+                        class="img-fluid rounded-4 shadow-lg problem-image"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<!-- CRISP-ML NAVIGATION -->
+<section class="py-4 bg-light">
+
+    <div class="container">
+
+        <div class="text-center mb-5">
+
+
+            <h2 class="display-6 fw-bold mt-3">
+                CRISP-ML Project Workflow
+            </h2>
+
+            <p class="text-muted mt-3">
+                Explore the main stages of the machine learning workflow
+                used throughout the project development process.
+            </p>
+
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-lg-3">
+
+                <div class="card border-0 shadow-sm h-100 p-4 text-center">
+
+                    <h4 class="fw-bold">
+                        CRISP-ML
+                    </h4>
+
+                    <p class="text-muted mt-3">
+                        Overview of the methodology and workflow structure.
+                    </p>
+
+                    <a href="/crispml" class="btn btn-success mt-3">
+                        Explore
+                    </a>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-3">
+
+                <div class="card border-0 shadow-sm h-100 p-4 text-center">
+
+                    <h4 class="fw-bold">
+                        Business Understanding
+                    </h4>
+
+                    <p class="text-muted mt-3">
+                        Definition of the problem, objectives, and research questions.
+                    </p>
+
+                    <a href="/business-understanding" class="btn btn-success mt-3">
+                        Explore
+                    </a>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-3">
+
+                <div class="card border-0 shadow-sm h-100 p-4 text-center">
+
+                    <h4 class="fw-bold">
+                        Data Understanding
+                    </h4>
+
+                    <p class="text-muted mt-3">
+                        Analysis of datasets, variables, and connectivity indicators.
+                    </p>
+
+                    <a href="/data-understanding" class="btn btn-success mt-3">
+                        Explore
+                    </a>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-3">
+
+                <div class="card border-0 shadow-sm h-100 p-4 text-center">
+
+                    <h4 class="fw-bold">
+                        Data Engineering
+                    </h4>
+
+                    <p class="text-muted mt-3">
+                        Data preprocessing, cleaning, and feature engineering.
+                    </p>
+
+                    <a href="/data-engineering" class="btn btn-success mt-3">
+                        Explore
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

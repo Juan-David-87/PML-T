@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}BrechaDigital CO{% endblock %}</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top py-3">
+
+        <div class="container">
+
+            <a class="navbar-brand fw-bold logo-text" href="/">
+                Digital<span>Divide</span> CO
+            </a>
+
+            <button class="navbar-toggler" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#menu">
+
+                <span class="navbar-toggler-icon"></span>
+
+            </button>
+
+            <div class="collapse navbar-collapse" id="menu">
+
+            <ul class="navbar-nav mx-auto">
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/">
+                        Home
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/crispml">
+                        CRISP-ML Methodology
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/business-understanding">
+                        Business Understanding
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/data-understanding">
+                        Data Understanding
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/data-engineering">
+                        Data Engineering
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+
+                <a class="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown">
+
+                    Model Engineering
+
+                </a>
+
+                <ul class="dropdown-menu">
+
+                    <li>
+                        <a class="dropdown-item" href="/dbscan-model">
+                            DBSCAN
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item" href="/PCA-Model">
+                            PCA
+                        </a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('kmeans') }}">
+                            K-Means
+                        </a>
+                    </li>
+                    
+                </ul>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                        data-bs-toggle="dropdown">
+                        Model Evaluation
+                    </a>
+
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('dbscan_evaluation') }}">
+                            DBSCAN Evaluation
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('pca_evaluation') }}">
+                            PCA Evaluation
+                            </a>
+                        </li>
+                        <li>
+    <a class="dropdown-item" href="{{ url_for('kmeans_evaluation') }}">
+        K-Means Evaluation
+    </a>
+</li>
+                    </ul>
+                </li>
+
+            </li>
+
+                <a href="/crispml" class="btn btn-success px-4 rounded-3">
+                    Explore Methodology
+                </a>
+
+            </div>
+            
+        </div>
+
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main>
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,145 @@
+{
+  "total_entities": 22164,
+  "train_size": 15514,
+  "test_size": 6650,
+  "n_features": 8,
+  "feature_names": [
+    "PUNTAJE ENTIDAD",
+    "PROMEDIO GRUPO PAR",
+    "MÁXIMO GRUPO PAR",
+    "MÍNIMO GRUPO PAR",
+    "QUINTIL GRUPO PAR",
+    "PERCENTIL GRUPO PAR",
+    "ID_DEPARTAMENTO",
+    "ID_MUNICIPIO"
+  ],
+  "n_components": 2,
+  "pca_variance_individual": [
+    35.94,
+    26.65
+  ],
+  "pca_variance_cumulative": [
+    35.94,
+    62.589999999999996
+  ],
+  "total_retained_variance": 62.589999999999996,
+  "pca_components": [
+    [
+      0.5665445648472127,
+      0.24175940921593853,
+      0.10494574374543375,
+      0.14552623732727527,
+      0.5239432829583536,
+      0.5285390526021344,
+      -0.1299617637203267,
+      -0.13277046096435968
+    ],
+    [
+      0.04867448468911215,
+      -0.30181392469864726,
+      -0.17260219911808952,
+      -0.15547379586449495,
+      0.2323942219386516,
+      0.235579027142833,
+      0.6096806182894111,
+      0.6093935676716149
+    ]
+  ],
+  "feature_loadings": [
+    {
+      "name": "PUNTAJE ENTIDAD",
+      "loading_pc1": 0.5665,
+      "loading_pc2": 0.0487,
+      "abs_loading_pc1": 0.5665,
+      "interpretation_pc1": "Positive contribution",
+      "interpretation_pc2": "Positive contribution"
+    },
+    {
+      "name": "PERCENTIL GRUPO PAR",
+      "loading_pc1": 0.5285,
+      "loading_pc2": 0.2356,
+      "abs_loading_pc1": 0.5285,
+      "interpretation_pc1": "Positive contribution",
+      "interpretation_pc2": "Positive contribution"
+    },
+    {
+      "name": "QUINTIL GRUPO PAR",
+      "loading_pc1": 0.5239,
+      "loading_pc2": 0.2324,
+      "abs_loading_pc1": 0.5239,
+      "interpretation_pc1": "Positive contribution",
+      "interpretation_pc2": "Positive contribution"
+    },
+    {
+      "name": "PROMEDIO GRUPO PAR",
+      "loading_pc1": 0.2418,
+      "loading_pc2": -0.3018,
+      "abs_loading_pc1": 0.2418,
+      "interpretation_pc1": "Positive contribution",
+      "interpretation_pc2": "Negative contribution"
+    },
+    {
+      "name": "MÍNIMO GRUPO PAR",
+      "loading_pc1": 0.1455,
+      "loading_pc2": -0.1555,
+      "abs_loading_pc1": 0.1455,
+      "interpretation_pc1": "Positive contribution",
+      "interpretation_pc2": "Negative contribution"
+    },
+    {
+      "name": "ID_MUNICIPIO",
+      "loading_pc1": -0.1328,
+      "loading_pc2": 0.6094,
+      "abs_loading_pc1": 0.1328,
+      "interpretation_pc1": "Negative contribution",
+      "interpretation_pc2": "Positive contribution"
+    },
+    {
+      "name": "ID_DEPARTAMENTO",
+      "loading_pc1": -0.13,
+      "loading_pc2": 0.6097,
+      "abs_loading_pc1": 0.13,
+      "interpretation_pc1": "Negative contribution",
+      "interpretation_pc2": "Positive contribution"
+    },
+    {
+      "name": "MÁXIMO GRUPO PAR",
+      "loading_pc1": 0.1049,
+      "loading_pc2": -0.1726,
+      "abs_loading_pc1": 0.1049,
+      "interpretation_pc1": "Positive contribution",
+      "interpretation_pc2": "Negative contribution"
+    }
+  ],
+  "reconstruction": {
+    "train_mse": 0.374111,
+    "test_mse": 0.370054,
+    "train_mae": 0.431821,
+    "test_mae": 0.429044,
+    "information_preserved": 62.59
+  },
+  "clustering_metrics": {
+    "original_space": {
+      "silhouette": 0.2337,
+      "davies_bouldin": 1.4017,
+      "calinski_harabasz": 7080.76
+    },
+    "pca_space": {
+      "silhouette": 0.3854,
+      "davies_bouldin": 0.8633,
+      "calinski_harabasz": 17054.43
+    },
+    "improvements": {
+      "silhouette": 64.9,
+      "davies_bouldin": 38.4,
+      "calinski_harabasz": 140.9
+    },
+    "average_improvement": 81.4
+  },
+  "validation": {
+    "ks_test": {
+      "pc1_statistic": 0.0149,
+      "pc1_pvalue": 0.2507,
+      "pc2_statistic": 0.0156,
+      "pc2_pvalue": 0.2076,
+      "consistent": 

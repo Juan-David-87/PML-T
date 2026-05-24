@@ -1,14 +1,3 @@
-"""
-kmeans_model.py
-───────────────
-K-Means clustering model for classifying Colombian public entities
-by their Digital Government Index (Índice de Gobierno Digital).
-
-Dataset : indice_gobierno_digital.csv  (77 163 rows, 18 columns)
-Features: 7 sub-index scores per entity (I18, I20, I21, I82, I83, I85, POL06)
-Output  : 4 clusters ranked by overall digital maturity
-"""
-
 import pandas as pd
 import numpy as np
 import matplotlib

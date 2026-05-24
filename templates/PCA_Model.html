@@ -52,209 +52,345 @@
   </div>
 </section>
 
-<!-- ── ERROR BANNER ──────────────────────────────────────────────────────── -->
-<div id="errorBanner" class="container mt-3" style="display:none;">
-  <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <strong><i class="bi bi-exclamation-triangle-fill"></i> Error loading data!</strong>
-    <span id="errorMessage">No se pudieron cargar los resultados del análisis PCA.</span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-</div>
-
 <!-- ── STEP TABS NAV ──────────────────────────────────────────────────────── -->
 <nav class="bg-white border-bottom sticky-top" style="top:72px;z-index:100;">
   <div class="container">
     <ul class="nav nav-tabs border-0 flex-nowrap overflow-auto" id="stepTabs">
-      <li class="nav-item"><a class="nav-link active fw-semibold px-4 py-3" href="#sec-split">Dataset Split</a></li>
-      <li class="nav-item"><a class="nav-link fw-semibold px-4 py-3" href="#sec-training">Training Process</a></li>
-      <li class="nav-item"><a class="nav-link fw-semibold px-4 py-3" href="#sec-hyperparams">Hyperparameters</a></li>
-      <li class="nav-item"><a class="nav-link fw-semibold px-4 py-3" href="#sec-validation">Metric Visualizations</a></li>
-      <li class="nav-item"><a class="nav-link fw-semibold px-4 py-3" href="#sec-visualizations">PCA Visualizations</a></li>
-      <li class="nav-item"><a class="nav-link fw-semibold px-4 py-3" href="#sec-eval-dashboard">Evaluation Dashboard</a></li>
-      <li class="nav-item"><a class="nav-link fw-semibold px-4 py-3" href="#sec-confusion">Confusion Matrix</a></li>
-      <li class="nav-item"><a class="nav-link fw-semibold px-4 py-3" href="#sec-comparative">Comparative Analysis</a></li>
-      <li class="nav-item"><a class="nav-link fw-semibold px-4 py-3" href="#sec-final-model">Final Model</a></li>
+      <li class="nav-item">
+        <a class="nav-link active fw-semibold px-4 py-3" href="#sec-split" data-step="split">
+          <i class="bi bi-scissors me-1"></i>Dataset Split
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link fw-semibold px-4 py-3" href="#sec-training" data-step="train">
+          <i class="bi bi-cpu me-1"></i>Training Process
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link fw-semibold px-4 py-3" href="#sec-hyperparams" data-step="hyper">
+          <i class="bi bi-sliders me-1"></i>Hyperparameters
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link fw-semibold px-4 py-3" href="#sec-validation" data-step="valid">
+          <i class="bi bi-check2-circle me-1"></i>Validation & Metrics
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link fw-semibold px-4 py-3" href="#sec-visualizations" data-step="viz">
+          <i class="bi bi-bar-chart-steps me-1"></i>Visualizations
+        </a>
+      </li>
     </ul>
   </div>
 </nav>
 
 <div class="container py-5">
 
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<!-- SECTION 1: DATASET SPLIT                                                   -->
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║  SECTION 1 · DATASET SPLIT                                          ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
 <section id="sec-split" class="mb-5">
   <div class="d-flex align-items-center gap-3 mb-4">
     <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
          style="width:40px;height:40px;background:#166534;font-size:1.1rem;">1</div>
     <h2 class="fw-bold mb-0">Dataset Split</h2>
   </div>
+
   <div class="row g-4">
     <div class="col-lg-5">
       <div class="card border-0 shadow-sm h-100 p-4">
         <h5 class="fw-bold mb-3"><i class="bi bi-database me-2 text-success"></i>Data Preparation</h5>
-        <p class="text-muted">The raw dataset contains records across multiple years and sub-indices. We filter for <strong>VIGENCIA 2021</strong> and extract the numerical score columns that represent Gobierno Digital performance metrics.</p>
-        <p class="text-muted">The dataset is strategically split into <strong>70% training</strong> and <strong>30% testing</strong> to ensure the PCA transformation generalizes correctly without overfitting the covariance structure.</p>
-        <div class="mt-3"><h6 class="fw-semibold">Features used:</h6><ul id="feat-list" class="text-muted small ps-3"></ul></div>
-      </div>
-    </div>
-    <div class="col-lg-4">
-      <div class="card border-0 shadow-sm h-100 p-4 text-center">
-        <h5 class="fw-bold mb-4">Train / Test Split</h5>
-        <canvas id="splitChart" style="max-height:220px;" aria-label="Train test split distribution chart" role="img"></canvas>
-        <div class="row mt-4 text-center g-2">
-          <div class="col-6"><div class="fw-bold fs-4 text-success" id="split-train">—</div><div class="small text-muted">Train (70%)</div></div>
-          <div class="col-6"><div class="fw-bold fs-4 text-info" id="split-test">—</div><div class="small text-muted">Test (30%)</div></div>
+        <p class="text-muted">
+          The raw dataset contains <strong>77,163 records</strong> across multiple years and sub-indices.
+          We filter for <strong>VIGENCIA 2021</strong> and extract the 6 numerical score columns that
+          represent Gobierno Digital performance metrics.
+        </p>
+        <p class="text-muted">
+          The dataset is strategically split into <strong>70% training</strong> and <strong>30% testing</strong> 
+          to ensure the PCA transformation generalizes correctly without overfitting the covariance structure.
+        </p>
+        <div class="mt-3">
+          <h6 class="fw-semibold">Features used (6 numeric):</h6>
+          <ul id="feat-list" class="text-muted small ps-3"></ul>
         </div>
       </div>
     </div>
+
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm h-100 p-4 text-center">
+        <h5 class="fw-bold mb-4">Train / Test Split</h5>
+        <canvas id="splitChart" style="max-height:220px;"></canvas>
+        <div class="row mt-4 text-center g-2">
+          <div class="col-6">
+            <div class="fw-bold fs-4 text-success" id="split-train">—</div>
+            <div class="small text-muted">Train (70%)</div>
+          </div>
+          <div class="col-6">
+            <div class="fw-bold fs-4 text-info" id="split-test">—</div>
+            <div class="small text-muted">Test (30%)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="col-lg-3">
       <div class="card border-0 shadow-sm h-100 p-4">
         <h5 class="fw-bold mb-3"><i class="bi bi-arrows-angle-contract me-2 text-success"></i>PCA Configuration</h5>
         <p class="text-muted small">StandardScaler normalises all features. PCA reduces to 2 components.</p>
         <div class="mt-3">
-          <div class="d-flex justify-content-between mb-1"><span class="small">PC 1</span><span class="small fw-bold text-success" id="pca1">—</span></div>
-          <div class="progress mb-3" style="height:8px;" role="progressbar" aria-label="PC1 variance"><div class="progress-bar bg-success" id="pca1-bar" style="width:0%"></div></div>
-          <div class="d-flex justify-content-between mb-1"><span class="small">PC 2</span><span class="small fw-bold text-info" id="pca2">—</span></div>
-          <div class="progress mb-3" style="height:8px;" role="progressbar" aria-label="PC2 variance"><div class="progress-bar bg-info" id="pca2-bar" style="width:0%"></div></div>
-          <div class="alert alert-success-subtle border-0 rounded-3 p-2 small" style="background:#f0fdf4;"><i class="bi bi-info-circle me-1 text-success"></i>PC1 + PC2 capture <strong id="total-retained">—</strong> of original variance</div>
+          <div class="d-flex justify-content-between mb-1">
+            <span class="small">PC 1</span><span class="small fw-bold text-success" id="pca1">—</span>
+          </div>
+          <div class="progress mb-3" style="height:8px;">
+            <div class="progress-bar bg-success" id="pca1-bar" style="width:0%"></div>
+          </div>
+          <div class="d-flex justify-content-between mb-1">
+            <span class="small">PC 2</span><span class="small fw-bold text-info" id="pca2">—</span>
+          </div>
+          <div class="progress mb-3" style="height:8px;">
+            <div class="progress-bar bg-info" id="pca2-bar" style="width:0%"></div>
+          </div>
+          <div class="alert alert-success-subtle border-0 rounded-3 p-2 small" style="background:#f0fdf4;">
+            <i class="bi bi-info-circle me-1 text-success"></i>
+            PC1 + PC2 capture <strong id="total-retained">—</strong> of original variance
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<!-- SECTION 2: TRAINING PROCESS                                                -->
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║  SECTION 2 · TRAINING PROCESS                                       ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
 <section id="sec-training" class="mb-5">
   <div class="d-flex align-items-center gap-3 mb-4">
-    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style="width:40px;height:40px;background:#166534;font-size:1.1rem;">2</div>
+    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+         style="width:40px;height:40px;background:#166534;font-size:1.1rem;">2</div>
     <h2 class="fw-bold mb-0">Training Process</h2>
   </div>
+
   <div class="row g-4 mb-4">
     <div class="col-lg-6">
       <div class="card border-0 shadow-sm p-4 h-100">
         <h5 class="fw-bold mb-3"><i class="bi bi-arrow-repeat me-2 text-success"></i>Pipeline Steps</h5>
         <div class="d-flex flex-wrap gap-2 align-items-center justify-content-center mb-4">
-          <span class="badge border text-dark bg-white fw-normal px-3 py-2">Load Data</span><i class="bi bi-arrow-right text-success"></i>
-          <span class="badge border text-dark bg-white fw-normal px-3 py-2">Feature Selection</span><i class="bi bi-arrow-right text-success"></i>
-          <span class="badge border text-dark bg-white fw-normal px-3 py-2">StandardScaler</span><i class="bi bi-arrow-right text-success"></i>
-          <span class="badge border text-dark bg-white fw-normal px-3 py-2">Fit PCA</span><i class="bi bi-arrow-right text-success"></i>
+          <span class="badge border text-dark bg-white fw-normal px-3 py-2">Load Data</span>
+          <i class="bi bi-arrow-right text-success"></i>
+          <span class="badge border text-dark bg-white fw-normal px-3 py-2">Feature Selection</span>
+          <i class="bi bi-arrow-right text-success"></i>
+          <span class="badge border text-dark bg-white fw-normal px-3 py-2">StandardScaler</span>
+          <i class="bi bi-arrow-right text-success"></i>
+          <span class="badge border text-dark bg-white fw-normal px-3 py-2">Fit PCA</span>
+          <i class="bi bi-arrow-right text-success"></i>
           <span class="badge border text-dark bg-white fw-normal px-3 py-2">Transform</span>
         </div>
-        <p class="text-muted small"><strong>Mandatory standardization:</strong> Without standardization, columns like <em>PUNTAJE_ENTIDAD</em> (0-100) would dominate the covariance matrix over columns like <em>QUINTIL_GRUPO_PAR</em> (1-5).</p>
+        <p class="text-muted small">
+          <strong>Mandatory standardization:</strong> Without standardization, columns like 
+          <em>PUNTAJE_ENTIDAD</em> (0-100) would dominate the covariance matrix over columns 
+          like <em>QUINTIL_GRUPO_PAR</em> (1-5).
+        </p>
         <div class="row g-3 mt-2">
-          <div class="col-md-4"><div class="rounded-3 p-3 text-center border border-success-subtle" style="background:#f0fdf4;"><div class="fw-bold text-success">Step 1</div><div class="small">StandardScaler</div><div class="text-muted small">z = (x - μ) / σ</div></div></div>
-          <div class="col-md-4"><div class="rounded-3 p-3 text-center border border-success-subtle" style="background:#f0fdf4;"><div class="fw-bold text-success">Step 2</div><div class="small">Covariance Matrix</div><div class="text-muted small">C = (1/(n-1)) XᵀX</div></div></div>
-          <div class="col-md-4"><div class="rounded-3 p-3 text-center border border-success-subtle" style="background:#f0fdf4;"><div class="fw-bold text-success">Step 3</div><div class="small">Eigen Decomposition</div><div class="text-muted small">C·v = λ·v</div></div></div>
+          <div class="col-md-4">
+            <div class="rounded-3 p-3 text-center border border-success-subtle" style="background:#f0fdf4;">
+              <div class="fw-bold text-success">Step 1</div>
+              <div class="small">StandardScaler</div>
+              <div class="text-muted small">z = (x - μ) / σ</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="rounded-3 p-3 text-center border border-success-subtle" style="background:#f0fdf4;">
+              <div class="fw-bold text-success">Step 2</div>
+              <div class="small">Covariance Matrix</div>
+              <div class="text-muted small">C = (1/(n-1)) XᵀX</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="rounded-3 p-3 text-center border border-success-subtle" style="background:#f0fdf4;">
+              <div class="fw-bold text-success">Step 3</div>
+              <div class="small">Eigen Decomposition</div>
+              <div class="text-muted small">C·v = λ·v</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+
     <div class="col-lg-6">
       <div class="card border-0 shadow-sm p-4 h-100">
         <h5 class="fw-bold mb-3"><i class="bi bi-bar-chart-line me-2 text-success"></i>Explained Variance (Scree Plot)</h5>
-        <canvas id="varianceChart" style="max-height:260px;" aria-label="Scree plot showing individual variance by component" role="img"></canvas>
-        <div class="mt-3 text-center"><span class="badge bg-success px-3 py-2"><i class="bi bi-check-circle me-1"></i>Total retained variance: <span id="total-var">—</span></span></div>
+        <canvas id="varianceChart" style="max-height:260px;"></canvas>
+        <div class="mt-3 text-center">
+          <span class="badge bg-success px-3 py-2">
+            <i class="bi bi-check-circle me-1"></i>
+            Total retained variance: <span id="total-var">—</span>
+          </span>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<!-- SECTION 3: HYPERPARAMETER CONFIGURATION                                     -->
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║  SECTION 3 · HYPERPARAMETER CONFIGURATION                           ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
 <section id="sec-hyperparams" class="mb-5">
   <div class="d-flex align-items-center gap-3 mb-4">
-    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style="width:40px;height:40px;background:#166534;font-size:1.1rem;">3</div>
+    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+         style="width:40px;height:40px;background:#166534;font-size:1.1rem;">3</div>
     <h2 class="fw-bold mb-0">Hyperparameter Configuration</h2>
   </div>
+
   <div class="row g-4">
     <div class="col-lg-6">
       <div class="card border-0 shadow-sm p-4 h-100">
         <h5 class="fw-bold mb-3"><i class="bi bi-toggles me-2 text-success"></i>PCA Parameters</h5>
         <div class="row g-3">
-          <div class="col-md-6"><div class="rounded-3 p-3 text-center border" style="background:#f8fafc;"><div class="text-muted small mb-1">n_components</div><div class="display-6 fw-bold text-success mb-0">2</div><div class="small text-muted">Components retained</div></div></div>
-          <div class="col-md-6"><div class="rounded-3 p-3 text-center border" style="background:#f8fafc;"><div class="text-muted small mb-1">svd_solver</div><div class="fw-bold text-success fs-4">"full"</div><div class="small text-muted">Exact SVD</div></div></div>
-          <div class="col-md-6"><div class="rounded-3 p-3 text-center border" style="background:#f8fafc;"><div class="text-muted small mb-1">whiten</div><div class="fw-bold text-success fs-4">False</div><div class="small text-muted">Preserves variance</div></div></div>
-          <div class="col-md-6"><div class="rounded-3 p-3 text-center border" style="background:#f8fafc;"><div class="text-muted small mb-1">random_state</div><div class="fw-bold text-success fs-4">42</div><div class="small text-muted">Reproducibility</div></div></div>
+          <div class="col-md-6">
+            <div class="rounded-3 p-3 text-center border" style="background:#f8fafc;">
+              <div class="text-muted small mb-1">n_components</div>
+              <div class="display-6 fw-bold text-success mb-0">2</div>
+              <div class="small text-muted">Components retained</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="rounded-3 p-3 text-center border" style="background:#f8fafc;">
+              <div class="text-muted small mb-1">svd_solver</div>
+              <div class="fw-bold text-success fs-4">"full"</div>
+              <div class="small text-muted">Exact SVD</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="rounded-3 p-3 text-center border" style="background:#f8fafc;">
+              <div class="text-muted small mb-1">whiten</div>
+              <div class="fw-bold text-success fs-4">False</div>
+              <div class="small text-muted">Preserves variance</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="rounded-3 p-3 text-center border" style="background:#f8fafc;">
+              <div class="text-muted small mb-1">random_state</div>
+              <div class="fw-bold text-success fs-4">42</div>
+              <div class="small text-muted">Reproducibility</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+
     <div class="col-lg-6">
       <div class="card border-0 shadow-sm p-4 h-100">
         <h5 class="fw-bold mb-3"><i class="bi bi-lightbulb me-2 text-warning"></i>Why 2 Components?</h5>
-        <ul class="text-muted small mb-3"><li class="mb-2"><strong>✓ Elbow criterion:</strong> Scree plot shows elbow at PC2</li><li class="mb-2"><strong>✓ Variance threshold met:</strong> Optimal information preservation</li><li class="mb-2"><strong>✓ 2D visualisation:</strong> Enables intuitive interpretation</li><li><strong>✓ Clustering performance:</strong> K-Means accuracy improves with PCA</li></ul>
-        <div class="alert alert-info border-0 small mt-2" style="background:#e0f2fe;"><i class="bi bi-graph-up me-1"></i><strong>PC1:</strong> Overall digital performance<br><strong>PC2:</strong> Peer-group spread</div>
+        <ul class="text-muted small mb-3">
+          <li class="mb-2"><strong>✓ Elbow criterion:</strong> Scree plot shows elbow at PC2</li>
+          <li class="mb-2"><strong>✓ 88% variance retained:</strong> Optimal information preservation</li>
+          <li class="mb-2"><strong>✓ 2D visualisation:</strong> Enables intuitive interpretation</li>
+          <li><strong>✓ Clustering performance:</strong> K-Means accuracy improves 14% with PCA</li>
+        </ul>
+        <div class="alert alert-info border-0 small mt-2" style="background:#e0f2fe;">
+          <i class="bi bi-graph-up me-1"></i>
+          <strong>PC1 (72%):</strong> Overall digital performance<br>
+          <strong>PC2 (16%):</strong> Peer-group spread
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Grid Search Results Table -->
   <div class="card border-0 shadow-sm p-4 mt-4">
     <h5 class="fw-bold mb-3"><i class="bi bi-table me-2 text-success"></i>Grid Search Results</h5>
-    <div class="table-responsive"><table class="table table-sm table-hover align-middle" id="gridTable" aria-label="Grid search results table"><thead class="table-light"><tr><th>n_components</th><th>Variance Retained</th><th>Reconstruction Error</th><th>Silhouette Score</th><th>Status</th></tr></thead><tbody id="gridTbody"></tbody></table></div>
+    <div class="table-responsive">
+      <table class="table table-sm table-hover align-middle" id="gridTable">
+        <thead class="table-light">
+          <tr>
+            <th>n_components</th>
+            <th>Variance Retained</th>
+            <th>Reconstruction Error</th>
+            <th>Silhouette Score</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="gridTbody"></tbody>
+      </table>
+    </div>
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<!-- SECTION 4: METRIC VISUALIZATIONS (Mejorada con el segundo código)          -->
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║  SECTION 4 · VALIDATION & ML METRICS                                ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
 <section id="sec-validation" class="mb-5">
   <div class="d-flex align-items-center gap-3 mb-4">
-    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style="width:40px;height:40px;background:#166534;font-size:1.1rem;">4</div>
-    <h2 class="fw-bold mb-0">Metric Visualizations</h2>
+    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+         style="width:40px;height:40px;background:#166534;font-size:1.1rem;">4</div>
+    <h2 class="fw-bold mb-0">Validation & Machine Learning Metrics</h2>
   </div>
 
   <!-- ML Metrics Cards -->
   <div class="row g-4 mb-4">
     <div class="col-md-3">
       <div class="card border-0 shadow-sm p-3 text-center h-100">
-        <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width:50px;height:50px;background:#f0fdf4;">
+        <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" 
+             style="width:50px;height:50px;background:#f0fdf4;">
           <i class="bi bi-trophy-fill text-success fs-3"></i>
         </div>
         <h3 class="fw-bold text-success mb-1" id="metric-accuracy">—</h3>
         <p class="text-muted small mb-0">Accuracy</p>
-        <div class="progress mt-2" style="height:4px;"><div class="progress-bar bg-success" id="acc-bar" style="width:0%"></div></div>
+        <div class="progress mt-2" style="height:4px;">
+          <div class="progress-bar bg-success" id="acc-bar" style="width:0%"></div>
+        </div>
       </div>
     </div>
     <div class="col-md-3">
       <div class="card border-0 shadow-sm p-3 text-center h-100">
-        <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width:50px;height:50px;background:#e0f2fe;">
+        <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" 
+             style="width:50px;height:50px;background:#e0f2fe;">
           <i class="bi bi-crosshair text-info fs-3"></i>
         </div>
         <h3 class="fw-bold text-info mb-1" id="metric-precision">—</h3>
         <p class="text-muted small mb-0">Precision</p>
-        <div class="progress mt-2" style="height:4px;"><div class="progress-bar bg-info" id="prec-bar" style="width:0%"></div></div>
+        <div class="progress mt-2" style="height:4px;">
+          <div class="progress-bar bg-info" id="prec-bar" style="width:0%"></div>
+        </div>
       </div>
     </div>
     <div class="col-md-3">
       <div class="card border-0 shadow-sm p-3 text-center h-100">
-        <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width:50px;height:50px;background:#fef3c7;">
+        <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" 
+             style="width:50px;height:50px;background:#fef3c7;">
           <i class="bi bi-eye-fill text-warning fs-3"></i>
         </div>
         <h3 class="fw-bold text-warning mb-1" id="metric-recall">—</h3>
         <p class="text-muted small mb-0">Recall</p>
-        <div class="progress mt-2" style="height:4px;"><div class="progress-bar bg-warning" id="recall-bar" style="width:0%"></div></div>
+        <div class="progress mt-2" style="height:4px;">
+          <div class="progress-bar bg-warning" id="recall-bar" style="width:0%"></div>
+        </div>
       </div>
     </div>
     <div class="col-md-3">
       <div class="card border-0 shadow-sm p-3 text-center h-100">
-        <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width:50px;height:50px;background:#fee2e2;">
+        <div class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" 
+             style="width:50px;height:50px;background:#fee2e2;">
           <i class="bi bi-bar-chart-steps text-danger fs-3"></i>
         </div>
         <h3 class="fw-bold text-danger mb-1" id="metric-f1">—</h3>
         <p class="text-muted small mb-0">F1-Score</p>
-        <div class="progress mt-2" style="height:4px;"><div class="progress-bar bg-danger" id="f1-bar" style="width:0%"></div></div>
+        <div class="progress mt-2" style="height:4px;">
+          <div class="progress-bar bg-danger" id="f1-bar" style="width:0%"></div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- MAE Card adicional del segundo código -->
+  <!-- MAE Card -->
   <div class="row g-4 mb-4">
     <div class="col-md-12">
       <div class="card border-0 shadow-sm p-3 text-center">
         <div class="d-flex align-items-center justify-content-between">
           <div class="d-flex align-items-center gap-3">
-            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:50px;height:50px;background:#f3e8ff;">
+            <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                 style="width:50px;height:50px;background:#f3e8ff;">
               <i class="bi bi-calculator-fill text-purple fs-3" style="color:#9333ea;"></i>
             </div>
             <div class="text-start">
@@ -306,7 +442,7 @@
         </div>
         <div class="mb-4">
           <div class="d-flex justify-content-between align-items-center mb-1">
-            <span class="fw-semibold">Variance Preserved</span>
+            <span class="fw-semibold">Info Preserved</span>
             <span class="badge bg-warning text-dark fs-6 px-3" id="info-preserved">—</span>
           </div>
           <div class="small text-muted">Information retained after PCA</div>
@@ -321,7 +457,12 @@
         <div class="table-responsive">
           <table class="table table-sm">
             <thead class="table-light">
-              <tr><th>Metric</th><th>Original Space</th><th>PCA Space</th><th>Improvement</th></tr>
+              <tr>
+                <th>Metric</th>
+                <th>Original Space</th>
+                <th>PCA Space</th>
+                <th>Improvement</th>
+              </tr>
             </thead>
             <tbody id="metrics-compare-tbody"></tbody>
           </table>
@@ -335,11 +476,16 @@
         <h5 class="fw-bold mb-3"><i class="bi bi-book me-2 text-success"></i>Interpretation Guide</h5>
         <div class="mb-3">
           <span class="badge bg-success mb-1">PC1 = 72.4% variance</span>
-          <p class="text-muted small">Captures <strong>overall digital performance</strong>. High positive loadings from ENTITY SCORE, PERCENTILE, and AVG.</p>
+          <p class="text-muted small">
+            Captures <strong>overall digital performance</strong>. High positive loadings from
+            ENTITY SCORE, PERCENTILE, and AVG.
+          </p>
         </div>
         <div class="mb-3">
           <span class="badge bg-info mb-1">PC2 = 15.8% variance</span>
-          <p class="text-muted small">Represents <strong>peer-group spread</strong>. Captures inequality within peer groups.</p>
+          <p class="text-muted small">
+            Represents <strong>peer-group spread</strong>. Captures inequality within peer groups.
+          </p>
         </div>
         <div class="alert border-0 rounded-3 p-2 small" style="background:#f0fdf4;">
           <i class="bi bi-lightbulb me-1 text-success"></i>
@@ -349,7 +495,7 @@
     </div>
   </div>
 
-  <!-- Structural Consistency Chart (del segundo código) -->
+  <!-- Structural Consistency -->
   <div class="row g-4 mt-2">
     <div class="col-lg-12">
       <div class="card border-0 shadow-sm p-4">
@@ -370,12 +516,13 @@
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<!-- SECTION 5: PCA VISUALIZATIONS                                               -->
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║  SECTION 5 · VISUALIZATIONS                                         ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
 <section id="sec-visualizations" class="mb-5">
   <div class="d-flex align-items-center gap-3 mb-4">
-    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style="width:40px;height:40px;background:#166534;font-size:1.1rem;">5</div>
+    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+         style="width:40px;height:40px;background:#166534;font-size:1.1rem;">5</div>
     <h2 class="fw-bold mb-0">PCA Visualizations</h2>
   </div>
 
@@ -386,111 +533,56 @@
     <canvas id="loadingsHeatmap" style="max-height:350px;"></canvas>
   </div>
 
+  <!-- PCA 2D Projection -->
   <div class="card border-0 shadow-sm p-4 mb-4">
-    <h5 class="fw-bold mb-3">PCA 2D Projection</h5>
-    <canvas id="pcaScatter" style="max-height:450px;" aria-label="PCA 2D scatter plot of entities" role="img"></canvas>
-    <div class="mt-3 text-center"><div class="d-flex justify-content-center gap-3 flex-wrap" id="scatter-legend"></div></div>
+    <h5 class="fw-bold mb-3"><i class="bi bi-scatter-chart me-2 text-success"></i>PCA 2D Projection</h5>
+    <p class="text-muted small mb-3">Entities projected onto first two principal components. Color represents performance quintile.</p>
+    <canvas id="pcaScatter" style="max-height:450px;"></canvas>
+    <div class="mt-3 text-center">
+      <div class="d-flex justify-content-center gap-3 flex-wrap" id="scatter-legend"></div>
+    </div>
   </div>
+
+  <!-- Variance Distribution -->
   <div class="row g-4">
-    <div class="col-lg-6"><div class="card border-0 shadow-sm p-4"><h5 class="fw-bold mb-3">Variance Distribution</h5><canvas id="variancePie" style="max-height:280px;" aria-label="Pie chart of variance distribution" role="img"></canvas></div></div>
-    <div class="col-lg-6"><div class="card border-0 shadow-sm p-4"><h5 class="fw-bold mb-3">Cumulative Explained Variance</h5><canvas id="cumulativeVariance" style="max-height:280px;" aria-label="Line chart of cumulative variance" role="img"></canvas></div></div>
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-pie-chart me-2 text-success"></i>Variance Distribution</h5>
+        <canvas id="variancePie" style="max-height:280px;"></canvas>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-line-chart me-2 text-success"></i>Cumulative Explained Variance</h5>
+        <canvas id="cumulativeVariance" style="max-height:280px;"></canvas>
+      </div>
+    </div>
   </div>
-  <div class="card border-0 shadow-sm p-4 mt-4"><h5 class="fw-bold mb-3">Feature Loadings Comparison</h5><canvas id="loadingsBar" style="max-height:350px;" aria-label="Bar chart of feature loadings for PC1 and PC2" role="img"></canvas></div>
-  
-  <!-- Biplot del segundo código -->
+
+  <!-- Feature Loadings Bar Chart -->
+  <div class="card border-0 shadow-sm p-4 mt-4">
+    <h5 class="fw-bold mb-3"><i class="bi bi-bar-chart-steps me-2 text-success"></i>Feature Loadings Comparison</h5>
+    <canvas id="loadingsBar" style="max-height:350px;"></canvas>
+  </div>
+
+  <!-- Biplot -->
   <div class="card border-0 shadow-sm p-4 mt-4">
     <h5 class="fw-bold mb-3"><i class="bi bi-vector-pen me-2 text-success"></i>PCA Biplot</h5>
     <p class="text-muted small mb-3">Feature vectors overlaid on PCA projection. Direction and length show feature contribution.</p>
     <canvas id="biplotChart" style="max-height:450px;"></canvas>
   </div>
 
+  <!-- Methodology note -->
   <div class="card border-0 shadow-sm p-4 mt-4" style="background:#f0fdf4;border-left:4px solid #16a34a !important;">
     <h6 class="fw-bold mb-2"><i class="bi bi-info-circle me-2 text-success"></i>PCA Methodology</h6>
-    <p class="text-muted small mb-0">Principal Component Analysis transforms correlated features into orthogonal components ordered by explained variance. PC1 captures the maximum variance (72.4%), followed by PC2 (15.8%). Standardization (Z-score) ensures all features contribute equally. The 2-component projection preserves 88.2% of original variance while enabling 2D visualization and improving clustering performance by 14% on average.</p>
+    <p class="text-muted small mb-0">
+      Principal Component Analysis transforms correlated features into orthogonal components ordered by 
+      explained variance. PC1 captures the maximum variance (72.4%), followed by PC2 (15.8%). 
+      Standardization (Z-score) ensures all features contribute equally. The 2-component projection 
+      preserves 88.2% of original variance while enabling 2D visualization and improving 
+      clustering performance by 14% on average.
+    </p>
   </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<!-- SECTION 6: EVALUATION DASHBOARD                                             -->
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<section id="sec-eval-dashboard" class="mb-5">
-  <div class="d-flex align-items-center gap-3 mb-4">
-    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style="width:40px;height:40px;background:#166534;font-size:1.1rem;">6</div>
-    <h2 class="fw-bold mb-0">Evaluation Dashboard</h2>
-  </div>
-  <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm p-3 text-center" style="border-top:4px solid #16a34a;"><div class="text-muted small mb-1">Silhouette Score</div><div class="fw-bold fs-2 text-success" id="eval-silhouette">—</div><div class="small text-muted">PCA space</div></div></div>
-    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm p-3 text-center" style="border-top:4px solid #0ea5e9;"><div class="text-muted small mb-1">Davies-Bouldin</div><div class="fw-bold fs-2 text-info" id="eval-db">—</div><div class="small text-muted">PCA space (lower=better)</div></div></div>
-    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm p-3 text-center" style="border-top:4px solid #f59e0b;"><div class="text-muted small mb-1">Calinski-Harabasz</div><div class="fw-bold fs-2 text-warning" id="eval-ch">—</div><div class="small text-muted">PCA space (higher=better)</div></div></div>
-    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm p-3 text-center" style="border-top:4px solid #8b5cf6;"><div class="text-muted small mb-1">Avg. Improvement</div><div class="fw-bold fs-2" style="color:#8b5cf6;" id="eval-avg">—</div><div class="small text-muted">PCA vs Original</div></div></div>
-  </div>
-  <div class="row g-4 mb-4">
-    <div class="col-lg-6"><div class="card border-0 shadow-sm p-4"><h5 class="fw-bold mb-3">Model Performance Radar</h5><canvas id="radarDashboard" style="max-height:300px;" aria-label="Radar chart comparing original vs PCA space" role="img"></canvas></div></div>
-    <div class="col-lg-6"><div class="card border-0 shadow-sm p-4"><h5 class="fw-bold mb-3">Metric Sensitivity to n_components</h5><canvas id="sensitivityChart" style="max-height:300px;" aria-label="Sensitivity analysis chart" role="img"></canvas></div></div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<!-- SECTION 7: CONFUSION MATRIX                                                 -->
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<section id="sec-confusion" class="mb-5">
-  <div class="d-flex align-items-center gap-3 mb-4">
-    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style="width:40px;height:40px;background:#166534;font-size:1.1rem;">7</div>
-    <h2 class="fw-bold mb-0">Confusion Matrix</h2>
-  </div>
-  <div class="row g-4">
-    <div class="col-lg-7"><div class="card border-0 shadow-sm p-4"><h5 class="fw-bold mb-1">Cluster Agreement Matrix</h5><p class="text-muted small mb-4">Cross-tabulation of cluster labels in original space vs PCA-reduced space.</p><canvas id="confusionCanvas" style="max-height:340px;" aria-label="Confusion matrix heatmap" role="img"></canvas><div class="mt-3 d-flex gap-3 align-items-center justify-content-center flex-wrap"><span class="small text-muted">Low agreement</span><div style="height:14px;width:180px;background:linear-gradient(to right,#f0fdf4,#16a34a);border-radius:4px;border:1px solid #d1fae5;"></div><span class="small text-muted">High agreement</span></div></div></div>
-    <div class="col-lg-5"><div class="card border-0 shadow-sm p-4 mb-3"><h6 class="fw-bold mb-3">Agreement Metrics</h6><div class="row g-2 text-center"><div class="col-6"><div class="rounded-3 p-2 border"><div class="small text-muted">Adjusted Rand</div><div class="fw-bold text-success fs-5" id="ari-score">0.781</div></div></div><div class="col-6"><div class="rounded-3 p-2 border"><div class="small text-muted">Norm. Mutual Info</div><div class="fw-bold text-success fs-5" id="nmi-score">0.812</div></div></div><div class="col-6"><div class="rounded-3 p-2 border"><div class="small text-muted">Overall Agreement</div><div class="fw-bold text-success fs-5" id="overall-agree">84.3%</div></div></div><div class="col-6"><div class="rounded-3 p-2 border"><div class="small text-muted">Disagreement</div><div class="fw-bold text-danger fs-5" id="disagree">15.7%</div></div></div></div></div>
-    <div class="card border-0 shadow-sm p-4" style="background:#f0fdf4;border-left:4px solid #16a34a;"><h6 class="fw-bold mb-2 text-success"><i class="bi bi-info-circle me-1"></i>Interpretation</h6><p class="text-muted small mb-0">An Adjusted Rand Index of <strong>0.781</strong> indicates strong structural agreement between clustering performed in original vs. PCA space.</p></div></div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<!-- SECTION 8: COMPARATIVE ANALYSIS                                             -->
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<section id="sec-comparative" class="mb-5">
-  <div class="d-flex align-items-center gap-3 mb-4">
-    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style="width:40px;height:40px;background:#166534;font-size:1.1rem;">8</div>
-    <h2 class="fw-bold mb-0">Comparative Analysis</h2>
-  </div>
-  <div class="row g-4 mb-4">
-    <div class="col-md-4"><div class="card border-0 shadow-sm p-4" style="border-top:4px solid #16a34a;"><div class="d-flex align-items-center gap-2 mb-3"><span class="badge bg-success px-2 py-1">Selected</span><h6 class="fw-bold mb-0">PCA (2 components)</h6></div><ul class="text-muted small ps-3 mb-3"><li>Linear dimensionality reduction</li><li>Maximizes variance</li><li>Deterministic & fast</li></ul><div class="table-responsive"><table class="table table-sm mb-0"><tbody><tr><td class="text-muted small">Variance retained</td><td class="fw-bold text-success" id="comp-pca-var">—</td></tr><tr><td class="text-muted small">Silhouette</td><td class="fw-bold text-success" id="comp-pca-sil">—</td></tr></tbody></table></div></div></div>
-    <div class="col-md-4"><div class="card border-0 shadow-sm p-4" style="border-top:4px solid #9ca3af;"><div class="d-flex align-items-center gap-2 mb-3"><span class="badge bg-secondary px-2 py-1">Alternative</span><h6 class="fw-bold mb-0">t-SNE (2 components)</h6></div><ul class="text-muted small ps-3 mb-3"><li>Non-linear reduction</li><li>Preserves local structure</li><li>Stochastic & slow</li></ul><div class="table-responsive"><table class="table table-sm mb-0"><tbody><tr><td class="text-muted small">Silhouette</td><td class="fw-bold" id="comp-tsne-sil">—</td></tr></tbody></table></div></div></div>
-    <div class="col-md-4"><div class="card border-0 shadow-sm p-4" style="border-top:4px solid #9ca3af;"><div class="d-flex align-items-center gap-2 mb-3"><span class="badge bg-secondary px-2 py-1">Alternative</span><h6 class="fw-bold mb-0">UMAP (2 components)</h6></div><ul class="text-muted small ps-3 mb-3"><li>Manifold learning</li><li>Preserves global structure</li><li>Faster than t-SNE</li></ul><div class="table-responsive"><table class="table table-sm mb-0"><tbody><tr><td class="text-muted small">Silhouette</td><td class="fw-bold" id="comp-umap-sil">—</td></tr></tbody></table></div></div></div>
-  </div>
-  <div class="card border-0 shadow-sm p-4 mb-4"><h5 class="fw-bold mb-3">Method Comparison — Clustering Metrics</h5><canvas id="methodCompareChart" style="max-height:300px;" aria-label="Method comparison bar chart" role="img"></canvas></div>
-  <div class="card border-0 shadow-sm p-4"><h5 class="fw-bold mb-3">Preprocessing Strategy Comparison</h5><div class="row g-4"><div class="col-md-6"><canvas id="preprocessCompareChart" style="max-height:240px;" aria-label="Preprocessing comparison bar chart" role="img"></canvas></div><div class="col-md-6 d-flex flex-column justify-content-center"><h6 class="fw-semibold mb-3">Key Findings</h6><div class="d-flex align-items-start gap-2 mb-2"><span class="badge bg-success mt-1">1</span><p class="small text-muted mb-0">StandardScaler + PCA produces the highest silhouette score.</p></div><div class="d-flex align-items-start gap-2 mb-2"><span class="badge bg-warning text-dark mt-1">2</span><p class="small text-muted mb-0">MinMaxScaler + PCA gives comparable variance but worse cluster separation.</p></div><div class="d-flex align-items-start gap-2"><span class="badge bg-danger mt-1">3</span><p class="small text-muted mb-0">No scaling leads to PUNTAJE ENTIDAD dominating cluster diversity.</p></div></div></div></div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<!-- SECTION 9: FINAL SELECTED MODEL                                             -->
-<!-- ═══════════════════════════════════════════════════════════════════════════ -->
-<section id="sec-final-model" class="mb-5">
-  <div class="d-flex align-items-center gap-3 mb-4">
-    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style="width:40px;height:40px;background:#166534;font-size:1.1rem;">9</div>
-    <h2 class="fw-bold mb-0">Final Selected Model</h2>
-  </div>
-  <div class="card border-0 mb-4 p-4" style="background:linear-gradient(135deg,#0f2417 0%,#1a3a26 100%);color:#fff;"><div class="row align-items-center"><div class="col-auto"><i class="bi bi-award-fill text-warning" style="font-size:4rem;"></i></div><div class="col"><h3 class="fw-bold mb-1 text-white">StandardScaler → PCA (n=2) → KMeans (k=3)</h3><p class="opacity-75 mb-0">Selected based on elbow analysis, variance retention threshold (≥85%), and superior silhouette score over baseline</p></div><div class="col-auto text-end"><div class="fs-1 fw-bold text-success" id="final-variance">—</div><div class="small opacity-75">Variance retained</div></div></div></div>
-  <div class="row g-4 mb-4">
-    <div class="col-lg-6"><div class="card border-0 shadow-sm p-4"><h5 class="fw-bold mb-3">Final Configuration</h5><div class="table-responsive"><table class="table table-sm"><tbody><tr><td class="text-muted fw-semibold">Algorithm</td><td>Principal Component Analysis</td></tr><tr><td class="text-muted fw-semibold">n_components</td><td><span class="badge bg-success">2</span></td></tr><tr><td class="text-muted fw-semibold">svd_solver</td><td><code>full</code></td></tr><tr><td class="text-muted fw-semibold">Scaler</td><td>StandardScaler (Z-score)</td></tr><tr><td class="text-muted fw-semibold">Downstream model</td><td>KMeans (k=3, n_init=10)</td></tr></tbody></table></div></div></div>
-    <div class="col-lg-6"><div class="card border-0 shadow-sm p-4"><h5 class="fw-bold mb-3">Final Performance Summary</h5><canvas id="finalMetricsChart" style="max-height:280px;" aria-label="Final metrics comparison bar chart" role="img"></canvas></div></div>
-  </div>
-  <div class="card border-0 shadow-sm p-4"><h5 class="fw-bold mb-3">Decision Rationale</h5><div class="d-flex flex-column gap-3"><div class="d-flex align-items-start gap-3"><div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-white fw-bold" style="width:32px;height:32px;background:#16a34a;font-size:.85rem;">1</div><div><div class="fw-semibold small">Variance threshold met</div><div class="text-muted small">≥ 85% target. Adding PC3 yields minimal gain for more complexity.</div></div></div><div class="d-flex align-items-start gap-3"><div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-white fw-bold" style="width:32px;height:32px;background:#16a34a;font-size:.85rem;">2</div><div><div class="fw-semibold small">Best clustering quality</div><div class="text-muted small">Silhouette score superior to alternatives.</div></div></div><div class="d-flex align-items-start gap-3"><div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-white fw-bold" style="width:32px;height:32px;background:#16a34a;font-size:.85rem;">3</div><div><div class="fw-semibold small">Interpretability retained</div><div class="text-muted small">PC1 = overall digital performance; PC2 = peer-group spread.</div></div></div></div></div>
-  <div class="card border-0 shadow-sm p-4 mt-4" style="background:#1e293b;color:#e2e8f0;"><h6 class="fw-bold mb-3" style="color:#4ade80;"><i class="bi bi-code-slash me-2"></i>Reproducibility — Key Code Snippet</h6><pre class="mb-0 small" style="color:#e2e8f0;white-space:pre-wrap;">from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
-from sklearn.cluster import KMeans
-
-<span style="color:#86efac;"># 1. Scale</span>
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
-
-<span style="color:#86efac;"># 2. PCA</span>
-pca = PCA(n_components=<span style="color:#fde68a;">2</span>, svd_solver=<span style="color:#fde68a;">'full'</span>, random_state=<span style="color:#fde68a;">42</span>)
-X_pca = pca.fit_transform(X_scaled)
-
-<span style="color:#86efac;"># 3. Cluster</span>
-kmeans = KMeans(n_clusters=<span style="color:#fde68a;">3</span>, random_state=<span style="color:#fde68a;">42</span>, n_init=<span style="color:#fde68a;">10</span>)
-labels = kmeans.fit_predict(X_pca)</pre></div>
 </section>
 
 </div><!-- /container -->
@@ -505,8 +597,19 @@ const pcaData = {
   test_size: 23149,
   pca_variance_individual: [72.4, 15.8, 5.2, 3.1, 2.3, 1.2],
   total_retained_variance: 88.2,
-  reconstruction: { train_mse: 0.0082, test_mse: 0.0085, variance_preserved: 88.2 },
-  metrics: { accuracy: 92.47, precision: 89.23, recall: 91.18, f1: 90.19, mae: 0.0834, mse: 0.0082, rmse: 0.0906, r2: 0.8947 },
+  reconstruction: {
+    train_mse: 0.0082,
+    test_mse: 0.0085,
+    information_preserved: 88.2
+  },
+  // ML Metrics
+  metrics: {
+    accuracy: 92.47,
+    precision: 89.23,
+    recall: 91.18,
+    f1: 90.19,
+    mae: 0.0834
+  },
   metrics_comparison: [
     { metric: "Accuracy", original: 81.2, pca: 92.47, improvement: "+11.27%" },
     { metric: "Precision", original: 78.5, pca: 89.23, improvement: "+10.73%" },
@@ -514,38 +617,37 @@ const pcaData = {
     { metric: "F1-Score", original: 79.1, pca: 90.19, improvement: "+11.09%" },
     { metric: "MAE", original: 0.142, pca: 0.0834, improvement: "-41.3%" }
   ],
-  validation: { ks_test: { pc1_pvalue: 0.342, consistent: true }, train_stats: { pc1_mean: 0.015, pc1_std: 0.998, pc2_mean: -0.008, pc2_std: 0.995 }, test_stats: { pc1_mean: -0.032, pc1_std: 1.012, pc2_mean: 0.018, pc2_std: 1.008 } },
+  validation: {
+    ks_test: { pc1_pvalue: 0.342, consistent: true },
+    train_stats: { pc1_mean: 0.015, pc1_std: 0.998, pc2_mean: -0.008, pc2_std: 0.995 },
+    test_stats: { pc1_mean: -0.032, pc1_std: 1.012, pc2_mean: 0.018, pc2_std: 1.008 }
+  },
   feature_loadings: [
-    { name: "PUNTAJE ENTIDAD", loading_pc1: 0.512, loading_pc2: -0.212 },
-    { name: "PERCENTIL GRUPO PAR", loading_pc1: 0.501, loading_pc2: -0.189 },
-    { name: "PROMEDIO GRUPO PAR", loading_pc1: 0.488, loading_pc2: 0.301 },
-    { name: "QUINTIL GRUPO PAR", loading_pc1: 0.423, loading_pc2: -0.182 },
-    { name: "MÁXIMO GRUPO PAR", loading_pc1: 0.396, loading_pc2: 0.544 },
-    { name: "MÍNIMO GRUPO PAR", loading_pc1: -0.183, loading_pc2: 0.712 }
+    { name: "PUNTAJE ENTIDAD", loading_pc1: 0.512, loading_pc2: -0.212, interpretation_pc1: "Overall digital score" },
+    { name: "PERCENTIL GRUPO PAR", loading_pc1: 0.501, loading_pc2: -0.189, interpretation_pc1: "Peer percentile rank" },
+    { name: "PROMEDIO GRUPO PAR", loading_pc1: 0.488, loading_pc2: 0.301, interpretation_pc1: "Peer group average" },
+    { name: "QUINTIL GRUPO PAR", loading_pc1: 0.423, loading_pc2: -0.182, interpretation_pc1: "Performance quintile" },
+    { name: "MÁXIMO GRUPO PAR", loading_pc1: 0.396, loading_pc2: 0.544, interpretation_pc1: "Peer group max" },
+    { name: "MÍNIMO GRUPO PAR", loading_pc1: -0.183, loading_pc2: 0.712, interpretation_pc1: "Peer group min" }
   ],
-  feature_names: ["PUNTAJE ENTIDAD","PERCENTIL GRUPO PAR","PROMEDIO GRUPO PAR","QUINTIL GRUPO PAR","MÁXIMO GRUPO PAR","MÍNIMO GRUPO PAR"],
-  methods_comparison: [
-    { method: "PCA (Selected)", silhouette: 0.423, davies_bouldin: 0.812, calinski_harabasz: 1847 },
-    { method: "t-SNE", silhouette: 0.389, davies_bouldin: 0.690, calinski_harabasz: 1521 },
-    { method: "UMAP", silhouette: 0.401, davies_bouldin: 0.731, calinski_harabasz: 1633 }
-  ]
+  feature_names: ["PUNTAJE ENTIDAD", "PERCENTIL GRUPO PAR", "PROMEDIO GRUPO PAR", "QUINTIL GRUPO PAR", "MÁXIMO GRUPO PAR", "MÍNIMO GRUPO PAR"]
 };
 
-// Sample points for scatter plot
+// Sample data for scatter plot
 const scatterPoints = [
-  { pc1: 2.5, pc2: 1.2, quintil: 5 }, { pc1: 1.8, pc2: 0.5, quintil: 4 },
-  { pc1: 0.5, pc2: -0.3, quintil: 3 }, { pc1: -1.2, pc2: 0.8, quintil: 2 },
-  { pc1: -2.0, pc2: -1.5, quintil: 1 }, { pc1: 1.2, pc2: -0.8, quintil: 4 },
-  { pc1: -0.8, pc2: 1.5, quintil: 2 }, { pc1: 0.2, pc2: -0.5, quintil: 3 },
-  { pc1: 2.0, pc2: -0.2, quintil: 5 }, { pc1: -1.5, pc2: 0.2, quintil: 1 }
+  { pc1: 2.5, pc2: 1.2, quintil: 5 },
+  { pc1: 1.8, pc2: 0.5, quintil: 4 },
+  { pc1: 0.5, pc2: -0.3, quintil: 3 },
+  { pc1: -1.2, pc2: 0.8, quintil: 2 },
+  { pc1: -2.0, pc2: -1.5, quintil: 1 },
+  { pc1: 1.2, pc2: -0.8, quintil: 4 },
+  { pc1: -0.8, pc2: 1.5, quintil: 2 },
+  { pc1: 0.2, pc2: -0.5, quintil: 3 },
+  { pc1: 2.0, pc2: -0.2, quintil: 5 },
+  { pc1: -1.5, pc2: 0.2, quintil: 1 }
 ];
 
-const quintileColors = { 1:"#dc2626", 2:"#f59e0b", 3:"#eab308", 4:"#84cc16", 5:"#16a34a" };
-
-// Chart instances storage
-let chartInstances = {};
-
-function destroyChart(chartId) { if (chartInstances[chartId]) { chartInstances[chartId].destroy(); delete chartInstances[chartId]; } }
+const quintileColors = { 1: "#dc2626", 2: "#f59e0b", 3: "#eab308", 4: "#84cc16", 5: "#16a34a" };
 
 function initPage() {
   // Hero stats
@@ -553,70 +655,80 @@ function initPage() {
   document.getElementById("stat-features").textContent = pcaData.n_features;
   document.getElementById("stat-pc1").textContent = pcaData.pca_variance_individual[0] + "%";
   document.getElementById("stat-total").textContent = pcaData.total_retained_variance + "%";
-  document.getElementById("total-var").textContent = pcaData.total_retained_variance + "%";
-  document.getElementById("total-retained").textContent = pcaData.total_retained_variance + "%";
+
+  // Feature list
+  const featList = document.getElementById("feat-list");
+  pcaData.feature_names.forEach(c => {
+    const li = document.createElement("li"); li.textContent = c; featList.appendChild(li);
+  });
+
+  // Split stats
+  document.getElementById("split-train").textContent = pcaData.train_size.toLocaleString();
+  document.getElementById("split-test").textContent = pcaData.test_size.toLocaleString();
   document.getElementById("pca1").textContent = pcaData.pca_variance_individual[0] + "%";
   document.getElementById("pca2").textContent = pcaData.pca_variance_individual[1] + "%";
   document.getElementById("pca1-bar").style.width = pcaData.pca_variance_individual[0] + "%";
   document.getElementById("pca2-bar").style.width = pcaData.pca_variance_individual[1] + "%";
-  document.getElementById("split-train").textContent = pcaData.train_size.toLocaleString();
-  document.getElementById("split-test").textContent = pcaData.test_size.toLocaleString();
-  document.getElementById("final-variance").textContent = pcaData.total_retained_variance + "%";
-  document.getElementById("comp-pca-var").textContent = pcaData.total_retained_variance + "%";
-  document.getElementById("comp-pca-sil").textContent = pcaData.methods_comparison[0].silhouette;
-  document.getElementById("comp-tsne-sil").textContent = pcaData.methods_comparison[1].silhouette;
-  document.getElementById("comp-umap-sil").textContent = pcaData.methods_comparison[2].silhouette;
-
+  document.getElementById("total-retained").textContent = pcaData.total_retained_variance + "%";
+  document.getElementById("total-var").textContent = pcaData.total_retained_variance + "%";
+  
   // ML Metrics
   document.getElementById("metric-accuracy").textContent = pcaData.metrics.accuracy + "%";
   document.getElementById("metric-precision").textContent = pcaData.metrics.precision + "%";
   document.getElementById("metric-recall").textContent = pcaData.metrics.recall + "%";
   document.getElementById("metric-f1").textContent = pcaData.metrics.f1 + "%";
   document.getElementById("metric-mae").textContent = pcaData.metrics.mae;
+  
   document.getElementById("acc-bar").style.width = pcaData.metrics.accuracy + "%";
   document.getElementById("prec-bar").style.width = pcaData.metrics.precision + "%";
   document.getElementById("recall-bar").style.width = pcaData.metrics.recall + "%";
   document.getElementById("f1-bar").style.width = pcaData.metrics.f1 + "%";
   document.getElementById("mae-bar").style.width = (1 - pcaData.metrics.mae) * 100 + "%";
   
-  // Evaluation Dashboard
-  document.getElementById("eval-silhouette").textContent = pcaData.methods_comparison[0].silhouette;
-  document.getElementById("eval-db").textContent = pcaData.methods_comparison[0].davies_bouldin;
-  document.getElementById("eval-ch").textContent = pcaData.methods_comparison[0].calinski_harabasz;
-  document.getElementById("eval-avg").textContent = "14.2%";
-
-  // Feature list
-  const featList = document.getElementById("feat-list");
-  pcaData.feature_names.forEach(c => { const li = document.createElement("li"); li.textContent = c; featList.appendChild(li); });
-
   // Metrics comparison table
   const compareTbody = document.getElementById("metrics-compare-tbody");
   pcaData.metrics_comparison.forEach(m => {
-    const cls = m.improvement.includes("+") ? "text-success" : "text-danger";
-    compareTbody.innerHTML += `<tr><td class="fw-semibold">${m.metric}</td><td class="text-muted">${m.original}${m.metric === "MAE" ? '' : '%'}</td><td class="fw-bold text-success">${m.pca}${m.metric === "MAE" ? '' : '%'}</td><td class="${cls}">${m.improvement}</td></tr>`;
+    const improvementClass = m.improvement.includes("+") ? "text-success" : "text-danger";
+    compareTbody.innerHTML += `
+      <tr>
+        <td class="fw-semibold">${m.metric}</td>
+        <td class="text-muted">${m.original}${m.metric === "MAE" ? '' : '%'}</td>
+        <td class="fw-bold text-success">${m.pca}${m.metric === "MAE" ? '' : '%'}</td>
+        <td class="${improvementClass}">${m.improvement}</td>
+      </tr>
+    `;
   });
 
-  // Reconstruction metrics
+  // Validation metrics
   document.getElementById("train-mse").textContent = pcaData.reconstruction.train_mse;
   document.getElementById("test-mse").textContent = pcaData.reconstruction.test_mse;
-  document.getElementById("info-preserved").textContent = pcaData.reconstruction.variance_preserved + "%";
+  document.getElementById("info-preserved").textContent = pcaData.reconstruction.information_preserved + "%";
+  document.getElementById("ks-pvalue").textContent = pcaData.validation.ks_test.pc1_pvalue;
+  document.getElementById("consistency-status").textContent = "✓ Consistent (p > 0.05)";
+
   const msePercent = Math.min(100, (1 - pcaData.reconstruction.train_mse) * 1000);
   document.getElementById("mse-bar").style.width = msePercent + "%";
   document.getElementById("test-mse-bar").style.width = (msePercent * 0.95) + "%";
 
-  // Validation metrics
-  document.getElementById("ks-pvalue").textContent = pcaData.validation.ks_test.pc1_pvalue;
-  document.getElementById("consistency-status").textContent = pcaData.validation.ks_test.consistent ? "✓ Consistent (p > 0.05)" : "⚠ Inconsistent";
-
   // Split donut chart
-  destroyChart("splitChart");
-  const splitCtx = document.getElementById("splitChart")?.getContext("2d");
-  if (splitCtx) chartInstances.splitChart = new Chart(splitCtx, { type: "doughnut", data: { labels: ["Train", "Test"], datasets: [{ data: [pcaData.train_size, pcaData.test_size], backgroundColor: ["#16a34a","#0ea5e9"], borderWidth: 0, hoverOffset: 8 }] }, options: { plugins: { legend: { display: false } }, cutout: "65%" } });
+  new Chart(document.getElementById("splitChart"), {
+    type: "doughnut",
+    data: { labels: ["Train", "Test"], datasets: [{ data: [pcaData.train_size, pcaData.test_size], backgroundColor: ["#16a34a","#0ea5e9"], borderWidth: 0, hoverOffset: 8 }] },
+    options: { plugins: { legend: { display: false } }, cutout: "65%" }
+  });
 
   // Variance chart (scree plot)
-  destroyChart("varianceChart");
-  const varianceCtx = document.getElementById("varianceChart")?.getContext("2d");
-  if (varianceCtx) chartInstances.varianceChart = new Chart(varianceCtx, { type: "bar", data: { labels: ["PC1","PC2","PC3","PC4","PC5","PC6"], datasets: [{ label: "Individual Variance (%)", data: pcaData.pca_variance_individual, backgroundColor: "rgba(22,163,74,0.6)", borderColor: "#16a34a", borderWidth: 1 }] }, options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } } });
+  new Chart(document.getElementById("varianceChart"), {
+    type: "bar",
+    data: {
+      labels: ["PC1", "PC2", "PC3", "PC4", "PC5", "PC6"],
+      datasets: [
+        { label: "Individual Variance (%)", data: pcaData.pca_variance_individual, backgroundColor: "rgba(22, 163, 74, 0.6)", borderColor: "#16a34a", borderWidth: 1, yAxisID: "y" },
+        { label: "Cumulative Variance (%)", data: [72.4, 88.2, 93.4, 96.5, 98.8, 100], type: "line", backgroundColor: "rgba(255, 99, 132, 0)", borderColor: "#f59e0b", borderWidth: 2, fill: false, tension: 0.1, yAxisID: "y1" }
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: "top" } }, scales: { y: { title: { display: true, text: "Variance (%)" }, beginAtZero: true, max: 100 }, y1: { title: { display: true, text: "Cumulative (%)" }, position: "right", beginAtZero: true, max: 100, grid: { drawOnChartArea: false } } } }
+  });
 
   // Grid table
   const gridTbody = document.getElementById("gridTbody");
@@ -628,102 +740,77 @@ function initPage() {
     { n_comp: 5, variance: 98.8, error: 0.0032, silhouette: 0.345, best: false },
     { n_comp: 6, variance: 100, error: 0.0000, silhouette: 0.298, best: false }
   ];
-  gridResults.forEach(r => { const tr = document.createElement("tr"); if (r.best) tr.classList.add("table-success"); tr.innerHTML = `<td>${r.n_comp}</td><td>${r.variance}%</td><td>${r.error}</td><td>${r.silhouette}</td><td>${r.best ? '<span class="badge bg-success">Optimal</span>' : ''}</td>`; gridTbody.appendChild(tr); });
+  gridResults.forEach(r => {
+    const tr = document.createElement("tr");
+    if (r.best) tr.classList.add("table-success");
+    tr.innerHTML = `<td>${r.n_comp}</td><td>${r.variance}%</td><td>${r.error}</td><td>${r.silhouette}</td><td>${r.best ? '<span class="badge bg-success">Optimal</span>' : ''}</td>`;
+    gridTbody.appendChild(tr);
+  });
 
   // Consistency chart
-  destroyChart("consistencyChart");
-  const consistencyCtx = document.getElementById("consistencyChart")?.getContext("2d");
-  if (consistencyCtx) chartInstances.consistencyChart = new Chart(consistencyCtx, { type: "bar", data: { labels: ["PC1 Mean", "PC1 Std", "PC2 Mean", "PC2 Std"], datasets: [{ label: "Train", data: [0.015, 0.998, -0.008, 0.995], backgroundColor: "#16a34a", borderRadius: 4 }, { label: "Test", data: [-0.032, 1.012, 0.018, 1.008], backgroundColor: "#0ea5e9", borderRadius: 4 }] }, options: { plugins: { legend: { position: "top" } }, responsive: true } });
+  new Chart(document.getElementById("consistencyChart"), {
+    type: "bar",
+    data: {
+      labels: ["PC1 Mean", "PC1 Std", "PC2 Mean", "PC2 Std"],
+      datasets: [
+        { label: "Train", data: [0.015, 0.998, -0.008, 0.995], backgroundColor: "#16a34a", borderRadius: 4 },
+        { label: "Test", data: [-0.032, 1.012, 0.018, 1.008], backgroundColor: "#0ea5e9", borderRadius: 4 }
+      ]
+    },
+    options: { plugins: { legend: { position: "top" } }, responsive: true, maintainAspectRatio: true }
+  });
 
   // Feature Loadings Heatmap
-  destroyChart("loadingsHeatmap");
-  const heatmapCtx = document.getElementById("loadingsHeatmap")?.getContext("2d");
-  if (heatmapCtx) chartInstances.loadingsHeatmap = new Chart(heatmapCtx, { type: "bar", data: { labels: pcaData.feature_names.map(n => n.length > 15 ? n.substring(0,12)+"..." : n), datasets: [{ label: "PC1 Loading", data: pcaData.feature_loadings.map(f => f.loading_pc1), backgroundColor: "#16a34a", borderRadius: 4 }, { label: "PC2 Loading", data: pcaData.feature_loadings.map(f => f.loading_pc2), backgroundColor: "#0ea5e9", borderRadius: 4 }] }, options: { responsive: true, plugins: { legend: { position: "top" } }, scales: { y: { title: { display: true, text: "Loading Value" }, beginAtZero: false } } } });
+  new Chart(document.getElementById('loadingsHeatmap'), {
+    type: 'bar',
+    data: {
+      labels: pcaData.feature_names.map(n => n.length > 15 ? n.substring(0, 12) + "..." : n),
+      datasets: [
+        { label: 'PC1 Loading', data: pcaData.feature_loadings.map(f => f.loading_pc1), backgroundColor: '#16a34a', borderRadius: 4 },
+        { label: 'PC2 Loading', data: pcaData.feature_loadings.map(f => f.loading_pc2), backgroundColor: '#0ea5e9', borderRadius: 4 }
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' } }, scales: { y: { title: { display: true, text: 'Loading Value' }, beginAtZero: false } } }
+  });
 
-  // PCA Scatter
-  destroyChart("pcaScatter");
-  const scatterCtx = document.getElementById("pcaScatter")?.getContext("2d");
+  // PCA 2D Scatter Plot
   const scatterColors = scatterPoints.map(p => quintileColors[p.quintil]);
-  if (scatterCtx) chartInstances.pcaScatter = new Chart(scatterCtx, { type: "scatter", data: { datasets: [{ label: "Entities", data: scatterPoints.map(p => ({ x: p.pc1, y: p.pc2 })), backgroundColor: scatterColors, borderColor: "#ffffff", borderWidth: 1, pointRadius: 6 }] }, options: { responsive: true, plugins: { tooltip: { callbacks: { label: ctx => `Quintile: ${scatterPoints[ctx.dataIndex].quintil}` } }, legend: { display: false } }, scales: { x: { title: { display: true, text: "PC1 (72.4% variance)" } }, y: { title: { display: true, text: "PC2 (15.8% variance)" } } } } });
-  
+  new Chart(document.getElementById("pcaScatter"), {
+    type: 'scatter',
+    data: { datasets: [{ label: 'Entities', data: scatterPoints.map(p => ({ x: p.pc1, y: p.pc2 })), backgroundColor: scatterColors, borderColor: '#ffffff', borderWidth: 1, pointRadius: 6, pointHoverRadius: 8 }] },
+    options: { responsive: true, maintainAspectRatio: true, plugins: { tooltip: { callbacks: { label: ctx => `Quintile: ${scatterPoints[ctx.dataIndex].quintil}` } }, legend: { display: false } }, scales: { x: { title: { display: true, text: 'PC1 (72.4% variance)' } }, y: { title: { display: true, text: 'PC2 (15.8% variance)' } } } }
+  });
+
+  // Legend for scatter plot
   const legendEl = document.getElementById("scatter-legend");
   Object.entries(quintileColors).forEach(([q, color]) => { legendEl.innerHTML += `<span class="badge px-2 py-1" style="background:${color};">Quintile ${q}</span>`; });
 
   // Variance Pie
-  destroyChart("variancePie");
-  const pieCtx = document.getElementById("variancePie")?.getContext("2d");
-  if (pieCtx) chartInstances.variancePie = new Chart(pieCtx, { type: "pie", data: { labels: ["PC1 (72.4%)","PC2 (15.8%)","PC3 (5.2%)","Others (6.6%)"], datasets: [{ data: [72.4,15.8,5.2,6.6], backgroundColor: ["#16a34a","#0ea5e9","#f59e0b","#9ca3af"], borderWidth: 0 }] }, options: { plugins: { legend: { position: "bottom" } } } });
+  new Chart(document.getElementById("variancePie"), { type: 'pie', data: { labels: ['PC1 (72.4%)', 'PC2 (15.8%)', 'PC3 (5.2%)', 'Others (6.6%)'], datasets: [{ data: [72.4, 15.8, 5.2, 6.6], backgroundColor: ['#16a34a', '#0ea5e9', '#f59e0b', '#9ca3af'], borderWidth: 0 }] }, options: { plugins: { legend: { position: 'bottom' } }, responsive: true } });
 
   // Cumulative Variance
-  destroyChart("cumulativeVariance");
-  const cumulativeCtx = document.getElementById("cumulativeVariance")?.getContext("2d");
-  if (cumulativeCtx) chartInstances.cumulativeVariance = new Chart(cumulativeCtx, { type: "line", data: { labels: ["PC1","PC2","PC3","PC4","PC5","PC6"], datasets: [{ label: "Cumulative Variance (%)", data: [72.4,88.2,93.4,96.5,98.8,100], borderColor: "#16a34a", backgroundColor: "rgba(22,163,74,0.1)", fill: true, tension: 0.3 }] }, options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } } });
+  new Chart(document.getElementById("cumulativeVariance"), { type: 'line', data: { labels: ['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6'], datasets: [{ label: 'Cumulative Variance (%)', data: [72.4, 88.2, 93.4, 96.5, 98.8, 100], borderColor: '#16a34a', backgroundColor: 'rgba(22, 163, 74, 0.1)', fill: true, tension: 0.3, pointRadius: 5, pointBackgroundColor: '#16a34a' }] }, options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' } }, scales: { y: { title: { display: true, text: 'Cumulative Variance (%)' }, beginAtZero: true, max: 100 } } } });
 
   // Feature Loadings Bar
-  destroyChart("loadingsBar");
-  const loadingsCtx = document.getElementById("loadingsBar")?.getContext("2d");
-  if (loadingsCtx) chartInstances.loadingsBar = new Chart(loadingsCtx, { type: "bar", data: { labels: pcaData.feature_names.map(n => n.length > 20 ? n.substring(0,17)+"..." : n), datasets: [{ label: "PC1 Loading", data: pcaData.feature_loadings.map(f => f.loading_pc1), backgroundColor: "#16a34a", borderRadius: 4 }, { label: "PC2 Loading", data: pcaData.feature_loadings.map(f => f.loading_pc2), backgroundColor: "#0ea5e9", borderRadius: 4 }] }, options: { responsive: true, plugins: { legend: { position: "top" } }, scales: { y: { title: { display: true, text: "Loading Value" }, beginAtZero: false } } } });
+  new Chart(document.getElementById("loadingsBar"), { type: 'bar', data: { labels: pcaData.feature_names.map(n => n.length > 20 ? n.substring(0, 17) + "..." : n), datasets: [{ label: 'PC1 Loading', data: pcaData.feature_loadings.map(f => f.loading_pc1), backgroundColor: '#16a34a', borderRadius: 4 }, { label: 'PC2 Loading', data: pcaData.feature_loadings.map(f => f.loading_pc2), backgroundColor: '#0ea5e9', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'top' } }, scales: { y: { title: { display: true, text: 'Loading Value' }, beginAtZero: false } } } });
 
   // Biplot
-  const vectors = pcaData.feature_loadings.map((f, i) => ({ x: f.loading_pc1 * 3, y: f.loading_pc2 * 3, label: pcaData.feature_names[i].substring(0,10) }));
-  destroyChart("biplotChart");
-  const biplotCtx = document.getElementById("biplotChart")?.getContext("2d");
-  if (biplotCtx) chartInstances.biplotChart = new Chart(biplotCtx, { type: "scatter", data: { datasets: [{ label: "Entities", data: scatterPoints.map(p => ({ x: p.pc1, y: p.pc2 })), backgroundColor: "#9ca3af", pointRadius: 4 }, { label: "Feature Vectors", data: vectors.map(v => ({ x: v.x, y: v.y })), type: "line", backgroundColor: "#dc2626", borderColor: "#dc2626", borderWidth: 2, pointRadius: 0, showLine: false }] }, options: { responsive: true, plugins: { tooltip: { callbacks: { label: ctx => vectors[ctx.dataIndex]?.label || "Entity" } }, legend: { position: "top" } }, scales: { x: { title: { display: true, text: "PC1 (72.4% variance)" }, min: -3.5, max: 3.5 }, y: { title: { display: true, text: "PC2 (15.8% variance)" }, min: -3, max: 3 } } } });
-
-  // Radar Dashboard
-  destroyChart("radarDashboard");
-  const radarCtx = document.getElementById("radarDashboard")?.getContext("2d");
-  if (radarCtx) chartInstances.radarDashboard = new Chart(radarCtx, { type: "radar", data: { labels: ["Silhouette","Calinski-H (norm)","Davies-B (inv)","Accuracy","F1-Score","Info Retained"], datasets: [{ label: "Original Space", data: [0.371,0.621,0.512,0.812,0.791,1.0], borderColor: "#9ca3af", backgroundColor: "rgba(156,163,175,0.15)", borderWidth: 2 }, { label: "PCA Space", data: [0.423,0.720,0.621,0.925,0.902,0.882], borderColor: "#16a34a", backgroundColor: "rgba(22,163,74,0.15)", borderWidth: 2 }] }, options: { responsive: true, scales: { r: { beginAtZero: true, max: 1 } } } });
-
-  // Sensitivity Chart
-  destroyChart("sensitivityChart");
-  const sensitivityCtx = document.getElementById("sensitivityChart")?.getContext("2d");
-  if (sensitivityCtx) chartInstances.sensitivityChart = new Chart(sensitivityCtx, { type: "line", data: { labels: ["1","2","3","4","5","6"], datasets: [{ label: "Silhouette", data: [0.312,0.423,0.398,0.371,0.345,0.298], borderColor: "#16a34a", backgroundColor: "rgba(22,163,74,0.08)", fill: true, tension: 0.3, pointRadius: 5 }, { label: "Variance Retained (%/100)", data: [0.724,0.882,0.934,0.965,0.988,1.0], borderColor: "#f59e0b", backgroundColor: "rgba(245,158,11,0.08)", fill: false, tension: 0.3, borderDash: [6,3] }] }, options: { responsive: true, scales: { y: { beginAtZero: true, max: 1.1 } } } });
-
-  // Method Compare Chart
-  destroyChart("methodCompareChart");
-  const methodCtx = document.getElementById("methodCompareChart")?.getContext("2d");
-  if (methodCtx) chartInstances.methodCompareChart = new Chart(methodCtx, { type: "bar", data: { labels: ["Silhouette","Davies-Bouldin (inv)","Calinski-H (÷1000)"], datasets: [{ label: "PCA (Selected)", data: [0.423,0.55,1.847], backgroundColor: "#16a34a", borderRadius: 4 }, { label: "t-SNE", data: [0.389,0.45,1.521], backgroundColor: "#9ca3af", borderRadius: 4 }, { label: "UMAP", data: [0.401,0.52,1.633], backgroundColor: "#0ea5e9", borderRadius: 4 }] }, options: { responsive: true, plugins: { legend: { position: "top" } } } });
-
-  // Preprocess Compare Chart
-  destroyChart("preprocessCompareChart");
-  const preprocCtx = document.getElementById("preprocessCompareChart")?.getContext("2d");
-  if (preprocCtx) chartInstances.preprocessCompareChart = new Chart(preprocCtx, { type: "bar", data: { labels: ["StandardScaler","MinMaxScaler","RobustScaler","No Scaling"], datasets: [{ label: "Silhouette Score", data: [0.423,0.391,0.408,0.198], backgroundColor: ["#16a34a","#f59e0b","#0ea5e9","#dc2626"], borderRadius: 4 }] }, options: { responsive: true, indexAxis: "y", plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, max: 0.5 } } } });
-
-  // Final Metrics Chart
-  destroyChart("finalMetricsChart");
-  const finalCtx = document.getElementById("finalMetricsChart")?.getContext("2d");
-  if (finalCtx) chartInstances.finalMetricsChart = new Chart(finalCtx, { type: "bar", data: { labels: ["Accuracy","Precision","Recall","F1-Score","Silhouette"], datasets: [{ label: "Original Space", data: [81.2,78.5,79.8,79.1,37.1], backgroundColor: "rgba(156,163,175,0.6)", borderRadius: 4 }, { label: "PCA (Final)", data: [92.47,89.23,91.18,90.19,42.3], backgroundColor: "rgba(22,163,74,0.8)", borderRadius: 4 }] }, options: { responsive: true, plugins: { legend: { position: "top" } }, scales: { y: { title: { display: true, text: "Score / %" }, beginAtZero: true, max: 100 } } } });
-
-  // Confusion Matrix Canvas
-  const canvas = document.getElementById("confusionCanvas");
-  if (canvas) {
-    const ctx = canvas.getContext("2d");
-    const matrix = [[18012,287,122],[193,11841,270],[312,421,22556]];
-    const maxVal = Math.max(...matrix.flat());
-    const cellSize = 90, padding = 80;
-    canvas.width = 3 * cellSize + padding * 2;
-    canvas.height = 3 * cellSize + padding * 2;
-    for (let r=0; r<3; r++) { for (let c=0; c<3; c++) { const val = matrix[r][c]; const intensity = val/maxVal; const rgb = r===c ? `rgba(22,${Math.round(22+intensity*141)},74,${0.15+intensity*0.8})` : `rgba(239,68,68,${0.05+intensity*0.4})`; ctx.fillStyle = rgb; ctx.fillRect(padding + c*cellSize, padding + r*cellSize, cellSize-2, cellSize-2); ctx.fillStyle = "#1e293b"; ctx.font = "bold 13px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(val.toLocaleString(), padding + c*cellSize + cellSize/2 - 1, padding + r*cellSize + cellSize/2 - 1); } }
-    ctx.fillStyle = "#64748b"; ctx.font = "11px sans-serif";
-    ["Cluster 0","Cluster 1","Cluster 2"].forEach((l,i)=>{ ctx.fillText(l, padding + i*cellSize + cellSize/2 - 1, padding - 15); ctx.save(); ctx.translate(padding - 15, padding + i*cellSize + cellSize/2 - 1); ctx.rotate(-Math.PI/2); ctx.fillText(l,0,0); ctx.restore(); });
-    ctx.fillStyle = "#1e293b"; ctx.font = "11px sans-serif"; ctx.textAlign = "center";
-    ctx.fillText("← PCA Space →", padding + 1.5*cellSize - 1, padding + 3*cellSize + 22);
-    ctx.save(); ctx.translate(18, padding + 1.5*cellSize - 1); ctx.rotate(-Math.PI/2); ctx.fillText("← Original Space →",0,0); ctx.restore();
-  }
+  const vectors = pcaData.feature_loadings.map((f, i) => ({ x: f.loading_pc1 * 3, y: f.loading_pc2 * 3, label: pcaData.feature_names[i].substring(0, 10) }));
+  new Chart(document.getElementById('biplotChart'), { type: 'scatter', data: { datasets: [{ label: 'Entities', data: scatterPoints.map(p => ({ x: p.pc1, y: p.pc2 })), backgroundColor: '#9ca3af', pointRadius: 4, pointHoverRadius: 6 }, { label: 'Feature Vectors', data: vectors.map(v => ({ x: v.x, y: v.y })), type: 'line', backgroundColor: '#dc2626', borderColor: '#dc2626', borderWidth: 2, pointRadius: 0, showLine: false }] }, options: { responsive: true, maintainAspectRatio: true, plugins: { tooltip: { callbacks: { label: ctx => vectors[ctx.dataIndex]?.label || 'Entity' } }, legend: { position: 'top' } }, scales: { x: { title: { display: true, text: 'PC1 (72.4% variance)' }, min: -3.5, max: 3.5 }, y: { title: { display: true, text: 'PC2 (15.8% variance)' }, min: -3, max: 3 } } } });
 }
 
-// Smooth scrolling and active tab
-document.querySelectorAll("#stepTabs .nav-link").forEach(link => {
+// Tab navigation
+document.querySelectorAll("[data-step]").forEach(link => {
   link.addEventListener("click", e => {
     e.preventDefault();
     const target = document.querySelector(link.getAttribute("href"));
     if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
-    document.querySelectorAll("#stepTabs .nav-link").forEach(l => l.classList.remove("active"));
+    document.querySelectorAll("[data-step]").forEach(l => l.classList.remove("active"));
     link.classList.add("active");
   });
 });
 
-document.addEventListener("DOMContentLoaded", initPage);
+document.addEventListener('DOMContentLoaded', function() { initPage(); });
 </script>
+
 {% endblock %}

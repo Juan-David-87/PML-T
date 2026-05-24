@@ -1,4 +1,5 @@
 from flask import Flask, render_template
+from kmeans_model import get_kmeans_results
 
 app = Flask(__name__)
 
@@ -36,7 +37,16 @@ def PCA_Model():
 
 @app.route('/kmeans')
 def kmeans():
-    return render_template('kmeans.html')
+    results = get_kmeans_results()
+    return render_template('kmeans.html', results=results)
+
+@app.route("/dbscan-evaluation")
+def dbscan_evaluation():
+    return render_template("dbscan_evaluation.html")
+
+@app.route("/PCA-evaluation")
+def PCA_evaluation(): 
+    return render_template("PCA_evaluation.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -23,7 +23,7 @@
         <div class="container">
 
             <a class="navbar-brand fw-bold logo-text" href="/">
-                Brecha<span>Digital</span> CO
+                Digital<span>Divide</span> CO
             </a>
 
             <button class="navbar-toggler" 
@@ -100,6 +100,26 @@
                     </li>
                     
                 </ul>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                        data-bs-toggle="dropdown">
+                        Model Evaluation
+                    </a>
+
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('dbscan_evaluation') }}">
+                                DBSCAN Evaluation
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('PCA_evaluation') }}">
+                                PCA Evaluation
+                            </a>
+                        </li>
+                    </ul>
+                </li>
 
             </li>
 

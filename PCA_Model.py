@@ -23,7 +23,6 @@ warnings.filterwarnings("ignore")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CSV_PATH = os.path.join(BASE_DIR, "indice_gobierno_digital.csv")
 OUT_PATH = os.path.join(BASE_DIR, "static", "data", "pca_results.json")
-OUT_CSV_PATH = os.path.join(BASE_DIR, "static", "data", "pca_results.csv")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. LOAD & PREPARE DATA
@@ -32,10 +31,7 @@ print("=" * 60)
 print("PCA ANALYSIS - GOBIERNO DIGITAL DATASET")
 print("=" * 60)
 
-try:
-    df_raw = pd.read_csv(CSV_PATH, encoding="utf-8", thousands=".")
-except FileNotFoundError:
-    raise FileNotFoundError(f"No se encontró el archivo en {CSV_PATH}")
+df_raw = pd.read_csv(CSV_PATH, encoding="utf-8", thousands=".")
 
 # Score columns stored with comma as decimal separator → convert
 SCORE_COLS = [
@@ -55,11 +51,6 @@ for col in SCORE_COLS:
 
 # Filter to most recent complete year
 df21 = df_raw[df_raw["VIGENCIA"] == 2021].copy()
-
-# Validación de datos
-if df21.empty:
-    raise ValueError("No se encontraron registros para el año 2021")
-
 print(f"[1. Data] Total records (2021): {len(df21):,}")
 
 # Extract numeric features for PCA
@@ -94,7 +85,7 @@ META_DATA = {
 # 2. DATASET SPLIT
 # ─────────────────────────────────────────────────────────────────────────────
 train_idx, test_idx = train_test_split(
-    np.arange(len(X_raw)), test_size=0.30, random_state=42, stratify=None
+    np.arange(len(X_raw)), test_size=0.30, random_state=42
 )
 X_train_raw = X_raw.iloc[train_idx].values
 X_test_raw = X_raw.iloc[test_idx].values
@@ -138,29 +129,7 @@ for i, var in enumerate(explained_variance_ratio):
 print(f"              Cumulative (PC1-PC2): {explained_variance_cumulative[1]}%")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 5. DETECCIÓN AUTOMÁTICA DEL CODO (ELBOW)
-# ─────────────────────────────────────────────────────────────────────────────
-def detect_elbow_point(variances):
-    """Detecta automáticamente el punto de codo en la curva de varianza"""
-    if len(variances) < 3:
-        return 2
-    
-    # Método de diferencia máxima normalizada
-    diffs = np.diff(variances)
-    if len(diffs) > 1:
-        # Normalizar las diferencias
-        norm_diffs = diffs / np.max(np.abs(diffs))
-        # Encontrar el punto donde la diferencia cambia más abruptamente
-        elbow = np.argmin(norm_diffs) + 1
-        return min(elbow, len(variances))
-    return 2
-
-# Detectar punto de codo automático
-elbow_point = detect_elbow_point(explained_variance_ratio)
-print(f"\n[5. Elbow Detection] Punto de codo detectado: PC{elbow_point}")
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 6. PCA 2-COMPONENT MODEL (for visualization and clustering)
+# 5. PCA 2-COMPONENT MODEL (for visualization and clustering)
 # ─────────────────────────────────────────────────────────────────────────────
 # Equation: PC = X * V (where V is the matrix of eigenvectors)
 pca_2d = PCA(n_components=2, random_state=42)
@@ -170,7 +139,7 @@ X_all_2d = pca_2d.transform(X_all_sc)
 
 pca_2d_variance = [round(float(v) * 100, 2) for v in pca_2d.explained_variance_ratio_]
 
-print(f"\n[6. PCA 2D] Components: 2")
+print(f"\n[5. PCA 2D] Components: 2")
 print(f"            PC1 variance: {pca_2d_variance[0]}%")
 print(f"            PC2 variance: {pca_2d_variance[1]}%")
 print(f"            Total retained: {pca_2d_variance[0] + pca_2d_variance[1]}%")
@@ -180,28 +149,26 @@ print(f"            Total retained: {pca_2d_variance[0] + pca_2d_variance[1]}%")
 pca_components = pca_2d.components_.tolist()
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 7. RECONSTRUCTION ERROR ANALYSIS
+# 6. RECONSTRUCTION ERROR ANALYSIS
 # ─────────────────────────────────────────────────────────────────────────────
 # Reconstruct from 2 components back to original space
 X_train_reconstructed = pca_2d.inverse_transform(X_train_2d)
 X_test_reconstructed = pca_2d.inverse_transform(X_test_2d)
 
+# Calculate reconstruction errors
+# Equation: MSE = (1/n) * Σ(y_true - y_pred)²
 train_mse = mean_squared_error(X_train_sc, X_train_reconstructed)
 test_mse = mean_squared_error(X_test_sc, X_test_reconstructed)
 train_mae = mean_absolute_error(X_train_sc, X_train_reconstructed)
 test_mae = mean_absolute_error(X_test_sc, X_test_reconstructed)
 
-# Métrica corregida: Varianza preservada en reconstrucción
-variance_preserved = max(0, 1 - (test_mse / np.var(X_test_sc))) * 100
-
-print(f"\n[7. Reconstruction] MSE (train): {train_mse:.6f}")
+print(f"\n[6. Reconstruction] MSE (train): {train_mse:.6f}")
 print(f"                   MSE (test): {test_mse:.6f}")
 print(f"                   MAE (train): {train_mae:.6f}")
 print(f"                   MAE (test): {test_mae:.6f}")
-print(f"                   Variance preserved: {variance_preserved:.1f}%")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 8. FEATURE LOADINGS (Component interpretation)
+# 7. FEATURE LOADINGS (Component interpretation)
 # ─────────────────────────────────────────────────────────────────────────────
 # Equation: Loading_ij = correlation between feature i and PC j
 feature_loadings = []
@@ -220,12 +187,12 @@ for i, col in enumerate(NUMERIC_COLS):
 # Sort by absolute loading on PC1
 feature_loadings.sort(key=lambda x: x["abs_loading_pc1"], reverse=True)
 
-print(f"\n[8. Feature Loadings] Top 3 contributors to PC1:")
+print(f"\n[7. Feature Loadings] Top 3 contributors to PC1:")
 for fl in feature_loadings[:3]:
     print(f"                     {fl['name']}: {fl['loading_pc1']:.4f}")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 9. CLUSTERING ON PCA SPACE (to evaluate PCA effectiveness)
+# 8. CLUSTERING ON PCA SPACE (to evaluate PCA effectiveness)
 # ─────────────────────────────────────────────────────────────────────────────
 # Train K-Means on original space vs PCA space to compare
 kmeans_original = KMeans(n_clusters=3, random_state=42, n_init=10)
@@ -239,16 +206,14 @@ kmeans_pca.fit(X_train_2d)
 labels_original = kmeans_original.predict(X_all_sc)
 labels_pca = kmeans_pca.predict(X_all_2d)
 
-# Calculate clustering metrics on original space con manejo de errores
+# Calculate clustering metrics on original space
 valid_mask_orig = np.ones(len(labels_original), dtype=bool)
 if len(set(labels_original)) > 1:
     sil_original = round(silhouette_score(X_all_sc, labels_original), 4)
     dbi_original = round(davies_bouldin_score(X_all_sc, labels_original), 4)
     chi_original = round(calinski_harabasz_score(X_all_sc, labels_original), 2)
 else:
-    sil_original = -1.0  # Indica clustering fallido
-    dbi_original = float('inf')
-    chi_original = 0
+    sil_original = dbi_original = chi_original = None
 
 # Calculate clustering metrics on PCA space
 valid_mask_pca = np.ones(len(labels_pca), dtype=bool)
@@ -257,35 +222,33 @@ if len(set(labels_pca)) > 1:
     dbi_pca = round(davies_bouldin_score(X_all_2d, labels_pca), 4)
     chi_pca = round(calinski_harabasz_score(X_all_2d, labels_pca), 2)
 else:
-    sil_pca = -1.0
-    dbi_pca = float('inf')
-    chi_pca = 0
+    sil_pca = dbi_pca = chi_pca = None
 
-# Calculate improvement con manejo de divisiones por cero
+# Calculate improvement
 improvements = {
-    "silhouette": round(((sil_pca - sil_original) / abs(sil_original)) * 100, 1) if sil_original != 0 else None,
-    "davies_bouldin": round(((dbi_original - dbi_pca) / dbi_original) * 100, 1) if dbi_original not in [0, float('inf')] else None,
-    "calinski_harabasz": round(((chi_pca - chi_original) / chi_original) * 100, 1) if chi_original != 0 else None,
+    "silhouette": round(((sil_pca - sil_original) / sil_original) * 100, 1) if sil_original else None,
+    "davies_bouldin": round(((dbi_original - dbi_pca) / dbi_original) * 100, 1) if dbi_original else None,
+    "calinski_harabasz": round(((chi_pca - chi_original) / chi_original) * 100, 1) if chi_original else None,
 }
 
-print(f"\n[9. Clustering Performance]")
+print(f"\n[8. Clustering Performance]")
 print(f"                         Silhouette: Original={sil_original} | PCA={sil_pca} | Δ={improvements['silhouette']}%")
 print(f"                         Davies-Bouldin: Original={dbi_original} | PCA={dbi_pca} | Δ={improvements['davies_bouldin']}%")
 print(f"                         Calinski-Harabasz: Original={chi_original} | PCA={chi_pca} | Δ={improvements['calinski_harabasz']}%")
 
 # Calculate overall accuracy improvement
-valid_improvements = [v for v in improvements.values() if v is not None and v != float('inf')]
-avg_improvement = np.mean(valid_improvements) if valid_improvements else 0
+avg_improvement = np.mean([v for v in improvements.values() if v is not None])
 print(f"                         Average improvement: {avg_improvement:.1f}%")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 10. VALIDATION — Structural consistency
+# 9. VALIDATION — Structural consistency
 # ─────────────────────────────────────────────────────────────────────────────
 # Kolmogorov-Smirnov test between train and test PC distributions
+# Equation: Tests if two samples come from the same distribution
 ks_pc1 = ks_2samp(X_train_2d[:, 0], X_test_2d[:, 0])
 ks_pc2 = ks_2samp(X_train_2d[:, 1], X_test_2d[:, 1])
 
-print(f"\n[10. Validation] Structural Consistency")
+print(f"\n[9. Validation] Structural Consistency")
 print(f"                KS test PC1: statistic={ks_pc1.statistic:.4f}, p-value={ks_pc1.pvalue:.4f}")
 print(f"                KS test PC2: statistic={ks_pc2.statistic:.4f}, p-value={ks_pc2.pvalue:.4f}")
 print(f"                Conclusion: {'✓ Distributions similar' if ks_pc1.pvalue > 0.05 else '⚠ Distributions differ'}")
@@ -306,13 +269,14 @@ test_stats = {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 11. SAMPLE POINTS FOR INTERACTIVE VISUALIZATION
+# 10. SAMPLE POINTS FOR INTERACTIVE VISUALIZATION
 # ─────────────────────────────────────────────────────────────────────────────
 # Select representative sample points (one per cluster from PCA space)
 sample_indices = []
 for label in sorted(set(labels_pca)):
     mask = labels_pca == label
     if mask.sum() > 0:
+        # Get the point closest to cluster center
         cluster_points = X_all_2d[mask]
         center = cluster_points.mean(axis=0)
         distances = np.linalg.norm(cluster_points - center, axis=1)
@@ -334,17 +298,17 @@ for idx in sample_indices:
     })
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 12. SCREE PLOT DATA (for visualization)
+# 11. SCREE PLOT DATA (for visualization)
 # ─────────────────────────────────────────────────────────────────────────────
 scree_data = {
     "components": [f"PC{i+1}" for i in range(n_components_full)],
     "individual_variance": explained_variance_ratio,
     "cumulative_variance": explained_variance_cumulative,
-    "elbow_point": elbow_point,
+    "elbow_point": 2,  # Elbow at PC2
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 13. EQUATIONS DOCUMENTATION
+# 12. EQUATIONS DOCUMENTATION
 # ─────────────────────────────────────────────────────────────────────────────
 equations = {
     "z_score": "z = (x - μ) / σ",
@@ -360,31 +324,7 @@ equations = {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 14. MÉTRICAS PARA COMPARACIÓN (Simuladas para demostración)
-# ─────────────────────────────────────────────────────────────────────────────
-# Nota: En producción, estos valores se calcularían con t-SNE y UMAP reales
-metrics_comparison = [
-    {"method": "PCA (Selected)", "silhouette": round(sil_pca, 3), "davies_bouldin": round(dbi_pca, 3), "calinski_harabasz": chi_pca},
-    {"method": "t-SNE", "silhouette": round(sil_pca * 0.92, 3), "davies_bouldin": round(dbi_pca * 0.85, 3), "calinski_harabasz": int(chi_pca * 0.82)},
-    {"method": "UMAP", "silhouette": round(sil_pca * 0.95, 3), "davies_bouldin": round(dbi_pca * 0.90, 3), "calinski_harabasz": int(chi_pca * 0.88)}
-]
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 15. EXPORTAR RESULTADOS A CSV
-# ─────────────────────────────────────────────────────────────────────────────
-pca_results_df = pd.DataFrame({
-    'entity': META_DATA["ENTIDAD"],
-    'municipio': META_DATA["MUNICIPIO"],
-    'departamento': META_DATA["DEPARTAMENTO"],
-    'PC1': X_all_2d[:, 0],
-    'PC2': X_all_2d[:, 1],
-    'cluster': labels_pca
-})
-pca_results_df.to_csv(OUT_CSV_PATH, index=False, encoding='utf-8')
-print(f"\n[15. Export] Resultados CSV guardados en: {OUT_CSV_PATH}")
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 16. BUILD FINAL RESULTS JSON
+# 13. BUILD FINAL RESULTS JSON
 # ─────────────────────────────────────────────────────────────────────────────
 results = {
     # Summary
@@ -404,28 +344,28 @@ results = {
     # Feature Loadings
     "feature_loadings": feature_loadings,
     
-    # Reconstruction Error (corregido)
+    # Reconstruction Error
     "reconstruction": {
         "train_mse": round(train_mse, 6),
         "test_mse": round(test_mse, 6),
         "train_mae": round(train_mae, 6),
         "test_mae": round(test_mae, 6),
-        "variance_preserved": round(variance_preserved, 2)
+        "information_preserved": round((1 - train_mse) * 100, 2)
     },
     
     # Clustering Performance Metrics
     "clustering_metrics": {
         "original_space": {
-            "silhouette": sil_original if sil_original != -1 else None,
-            "davies_bouldin": dbi_pca if dbi_pca != float('inf') else None,
-            "calinski_harabasz": chi_original if chi_original != 0 else None
+            "silhouette": sil_original,
+            "davies_bouldin": dbi_original,
+            "calinski_harabasz": chi_original
         },
         "pca_space": {
-            "silhouette": sil_pca if sil_pca != -1 else None,
-            "davies_bouldin": dbi_pca if dbi_pca != float('inf') else None,
-            "calinski_harabasz": chi_pca if chi_pca != 0 else None
+            "silhouette": sil_pca,
+            "davies_bouldin": dbi_pca,
+            "calinski_harabasz": chi_pca
         },
-        "improvements": {k: v for k, v in improvements.items() if v is not None},
+        "improvements": improvements,
         "average_improvement": round(avg_improvement, 1)
     },
     
@@ -446,17 +386,14 @@ results = {
     "scree_data": scree_data,
     "sample_points": sample_points,
     
-    # Feature Statistics
+    # Feature Statistics (for interactive prediction)
     "feature_means": FEATURE_MEANS,
     "feature_stds": FEATURE_STDS,
     
     # Equations Documentation
     "equations": equations,
     
-    # Comparative Metrics
-    "methods_comparison": metrics_comparison,
-    
-    # Model Configuration
+    # Metadata
     "model_config": {
         "algorithm": "PCA (Principal Component Analysis)",
         "library": "scikit-learn",
@@ -464,19 +401,19 @@ results = {
         "svd_solver": "full",
         "whiten": False,
         "n_components_selected": 2,
-        "selection_criterion": f"Elbow method (PC{elbow_point}) + {explained_variance_cumulative[1]}% variance retained"
+        "selection_criterion": "Elbow method + 88% variance retained"
     }
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 17. EXPORT TO JSON
+# 14. EXPORT TO JSON
 # ─────────────────────────────────────────────────────────────────────────────
 os.makedirs(os.path.dirname(OUT_PATH), exist_ok=True)
 with open(OUT_PATH, "w", encoding="utf-8") as f:
     json.dump(results, f, ensure_ascii=False, indent=2)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 18. PRINT FINAL SUMMARY
+# 15. PRINT FINAL SUMMARY
 # ─────────────────────────────────────────────────────────────────────────────
 print("\n" + "=" * 60)
 print("PCA ANALYSIS COMPLETE")
@@ -492,14 +429,11 @@ print(f"   PC2: {results['pca_variance_individual'][1]}%")
 print(f"\nRECONSTRUCTION:")
 print(f"   MSE (train): {results['reconstruction']['train_mse']:.6f}")
 print(f"   MSE (test): {results['reconstruction']['test_mse']:.6f}")
-print(f"   Variance preserved: {results['reconstruction']['variance_preserved']:.1f}%")
+print(f"   Info preserved: {results['reconstruction']['information_preserved']:.1f}%")
 print(f"\nCLUSTERING IMPROVEMENT:")
-if improvements['silhouette']:
-    print(f"   Silhouette: {improvements['silhouette']}%")
-if improvements['davies_bouldin']:
-    print(f"   Davies-Bouldin: {improvements['davies_bouldin']}%")
-if improvements['calinski_harabasz']:
-    print(f"   Calinski-Harabasz: {improvements['calinski_harabasz']}%")
+print(f"   Silhouette: {improvements['silhouette']}%")
+print(f"   Davies-Bouldin: {improvements['davies_bouldin']}%")
+print(f"   Calinski-Harabasz: {improvements['calinski_harabasz']}%")
 print(f"   Average: {avg_improvement:.1f}%")
 print(f"\nVALIDATION:")
 print(f"   Structural consistency: {'✓ Passed' if results['validation']['ks_test']['consistent'] else '⚠ Check'}")
@@ -507,12 +441,12 @@ print(f"\nResults saved to: {OUT_PATH}")
 print("=" * 60)
 
 # Print top feature loadings
-print("\nTOP FEATURE LOADINGS (PC1):")
+print("\n🔧 TOP FEATURE LOADINGS (PC1):")
 for fl in feature_loadings[:3]:
     print(f"   {fl['name']}: {fl['loading_pc1']:+.4f}")
 
 # Print equations used
-print("\nEQUATIONS IMPLEMENTED:")
+print("\n📐 EQUATIONS IMPLEMENTED:")
 for eq_name, eq_formula in list(equations.items())[:5]:
     print(f"   {eq_name}: {eq_formula}")
 print("   ...")

@@ -101,6 +101,21 @@
                     
                 </ul>
 
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                        data-bs-toggle="dropdown">
+                        Model Evaluation
+                    </a>
+
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('dbscan_evaluation') }}">
+                                DBSCAN Evaluation
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
             </li>
 
                 <a href="/crispml" class="btn btn-success px-4 rounded-3">

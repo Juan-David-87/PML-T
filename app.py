@@ -40,5 +40,9 @@ def kmeans():
     results = get_kmeans_results()
     return render_template('kmeans.html', results=results)
 
+@app.route("/dbscan-evaluation")
+def dbscan_evaluation():
+    return render_template("dbscan_evaluation.html")
+
 if __name__ == "__main__":
     app.run(debug=True)

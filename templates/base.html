@@ -110,14 +110,19 @@
                     <ul class="dropdown-menu">
                         <li>
                             <a class="dropdown-item" href="{{ url_for('dbscan_evaluation') }}">
-                                DBSCAN Evaluation
+                            DBSCAN Evaluation
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{ url_for('PCA_evaluation') }}">
-                                PCA Evaluation
+                            <a class="dropdown-item" href="{{ url_for('pca_evaluation') }}">
+                            PCA Evaluation
                             </a>
                         </li>
+                        <li>
+    <a class="dropdown-item" href="{{ url_for('kmeans_evaluation') }}">
+        K-Means Evaluation
+    </a>
+</li>
                     </ul>
                 </li>
 

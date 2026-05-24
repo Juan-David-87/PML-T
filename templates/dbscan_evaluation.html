@@ -325,65 +325,7 @@
 
 </section>
 
-<!-- FINAL SECTION -->
-<section class="mb-5">
 
-  <div class="card border-0 shadow-sm p-5"
-       style="background:#f0fdf4;">
-
-    <h2 class="fw-bold text-success mb-4">
-      Final Selected Model
-    </h2>
-
-    <p class="text-muted">
-
-      The final DBSCAN model was selected based on internal
-      clustering validation metrics and clustering stability analysis.
-
-    </p>
-
-    <div class="row g-4 mt-2">
-
-      <div class="col-md-6">
-
-        <ul class="text-muted">
-
-          <li>Highest silhouette score under acceptable noise</li>
-          <li>Low Davies-Bouldin Index</li>
-          <li>Good cluster compactness</li>
-          <li>Stable cluster distribution</li>
-
-        </ul>
-
-      </div>
-
-      <div class="col-md-6">
-
-        <div class="card border-0 shadow-sm p-4 bg-white">
-
-          <div class="small text-muted mb-2">
-            Final Configuration
-          </div>
-
-          <div class="fs-3 fw-bold text-success"
-               id="final-config">
-            —
-          </div>
-
-          <div class="mt-3 small text-muted">
-            Selected as the optimal DBSCAN configuration
-            for digital governance clustering analysis.
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
 
 </div>
 
@@ -419,8 +361,6 @@ function initEvaluation(d){
   document.getElementById("best-eps").textContent = d.best_eps;
   document.getElementById("best-ms").textContent = d.best_min_samples;
 
-  document.getElementById("final-config").textContent =
-    `ε = ${d.best_eps} | min_samples = ${d.best_min_samples}`;
 
   // TABLE
   const tbody = document.getElementById("comparisonTable");

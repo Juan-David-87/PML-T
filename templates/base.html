@@ -119,18 +119,40 @@
                             </a>
                         </li>
                         <li>
-    <a class="dropdown-item" href="{{ url_for('kmeans_evaluation') }}">
-        K-Means Evaluation
-    </a>
-</li>
+                            <a class="dropdown-item" href="{{ url_for('kmeans_evaluation') }}">
+                            K-Means Evaluation
+                            </a>
+                        </li>
                     </ul>
                 </li>
 
             </li>
 
-                <a href="/crispml" class="btn btn-success px-4 rounded-3">
-                    Explore Methodology
-                </a>
+                <li class="nav-item dropdown list-unstyled ms-3">
+
+    <a class="nav-link dropdown-toggle"
+       href="#"
+       role="button"
+       data-bs-toggle="dropdown">
+
+        Prediction System
+
+    </a>
+
+    <ul class="dropdown-menu">
+
+        <li>
+            <a class="dropdown-item"
+               href="{{ url_for('pca_prediction') }}">
+
+                PCA Predictor
+
+            </a>
+        </li>
+
+    </ul>
+
+</li>
 
             </div>
             

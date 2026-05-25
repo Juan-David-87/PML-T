@@ -74,5 +74,23 @@ def kmeans_evaluation():
     
     return render_template("kmeans_evaluation.html", results=mock_results)
 
+from flask import request, jsonify
+from pca_predictor import get_feature_stats, predict as pca_predict
+
+@app.route("/pca-prediction")
+def pca_prediction():
+    stats    = get_feature_stats()
+    features = list(stats.keys())
+    return render_template("pca_prediction.html", features=features, stats=stats)
+
+@app.route("/pca-predict", methods=["POST"])
+def pca_predict_api():
+    values = request.get_json(force=True)
+    try:
+        result = pca_predict(values)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
 if __name__ == "__main__":
     app.run(debug=True)

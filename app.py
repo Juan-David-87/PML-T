@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from kmeans_model import get_kmeans_results
 
 app = Flask(__name__)
@@ -73,6 +73,7 @@ def kmeans_evaluation():
     }
     
     return render_template("kmeans_evaluation.html", results=mock_results)
+ 
 
 from flask import request, jsonify
 from pca_predictor import get_feature_stats, predict as pca_predict
